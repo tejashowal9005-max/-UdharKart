@@ -1,6 +1,6 @@
 /* =================================================================
    UDHARKART — COMBINED JAVASCRIPT
-   Includes: app, auth, billing, customer, orders, products, shopkeeper
+   Merged from: app.js, auth.js, billing.js, customer.js, orders.js, products.js, shopkeeper.js
    ================================================================= */
 
 (function() {
