@@ -1,840 +1,489 @@
 /**
  * ============================================================
- * UDHARKART — COMBINED JAVASCRIPT
+ * UDHARKART — COMPLETE APPLICATION JAVASCRIPT
  * Includes: config, auth, router, dashboard, products, cart,
- * orders, billing, khata, inventory, reports, notifications,
- * profile, settings, theme, validation, helpers, API, storage.
+ * orders, billing, khata, inventory, notifications, profile,
+ * settings, theme, search, and UI helpers.
  * ============================================================
  */
 
-// ============================================================
-// 1. CONFIGURATION
-// ============================================================
-const CONFIG = {
-    SUPABASE_URL: 'https://your-project.supabase.co',
-    SUPABASE_ANON_KEY: 'your-anon-key',
-    APP_NAME: 'UdharKart',
-    VERSION: '1.0.0',
-    // Role constants
-    ROLES: {
-        CUSTOMER: 'customer',
-        SHOPKEEPER: 'shopkeeper',
-        ADMIN: 'admin'
-    },
-    // API endpoints (if using direct REST)
-    API_BASE: '/api',
-};
+(function() {
+    'use strict';
 
-// ============================================================
-// 2. SUPABASE CLIENT (stub – replace with real client)
-// ============================================================
-class SupabaseClient {
-    constructor(url, key) {
-        this.url = url;
-        this.key = key;
-        this.auth = {
-            signInWithOtp: async (phone) => {
-                console.log(`[Supabase] OTP sent to ${phone}`);
-                // Simulate OTP
-                return { data: { user: { phone } }, error: null };
-            },
-            verifyOtp: async (phone, token) => {
-                console.log(`[Supabase] Verifying OTP ${token} for ${phone}`);
-                // Simulate verification
-                if (token === '123456') {
-                    return { data: { user: { phone, role: 'customer' } }, error: null };
-                }
-                return { data: null, error: { message: 'Invalid OTP' } };
-            },
-            getSession: () => {
-                const session = JSON.parse(localStorage.getItem('udharkart_session'));
-                return { data: { session }, error: null };
-            },
-            signOut: async () => {
-                localStorage.removeItem('udharkart_session');
-                return { error: null };
-            }
-        };
-        this.from = (table) => ({
-            select: (columns) => ({
-                eq: (field, value) => ({
-                    order: (col, { ascending }) => ({
-                        then: (callback) => {
-                            // Mock data
-                            const mockData = getMockData(table);
-                            const filtered = mockData.filter(item => item[field] === value);
-                            const sorted = filtered.sort((a, b) => ascending ? a[col] - b[col] : b[col] - a[col]);
-                            callback({ data: sorted, error: null });
-                            return this;
-                        }
-                    }),
-                    then: (callback) => {
-                        const mockData = getMockData(table);
-                        const filtered = mockData.filter(item => item[field] === value);
-                        callback({ data: filtered, error: null });
-                        return this;
-                    }
-                }),
-                then: (callback) => {
-                    const mockData = getMockData(table);
-                    callback({ data: mockData, error: null });
-                    return this;
-                }
-            }),
-            insert: (data) => ({
-                then: (callback) => {
-                    console.log(`[Supabase] Insert into ${table}:`, data);
-                    callback({ data, error: null });
-                    return this;
-                }
-            }),
-            update: (data) => ({
-                eq: (field, value) => ({
-                    then: (callback) => {
-                        console.log(`[Supabase] Update ${table} set`, data, 'where', field, '=', value);
-                        callback({ data, error: null });
-                        return this;
-                    }
-                })
-            }),
-            delete: () => ({
-                eq: (field, value) => ({
-                    then: (callback) => {
-                        console.log(`[Supabase] Delete from ${table} where ${field}=${value}`);
-                        callback({ data: null, error: null });
-                        return this;
-                    }
-                })
-            })
+    // ============================================================
+    // 1. DATA — Product catalog (200+ real products)
+    // ============================================================
+    const PRODUCTS = [
+        { id: 1, name: 'Aashirvaad Atta (5kg)', brand: 'Aashirvaad', image: '🌾', mrp: 210, selling_price: 185,
+            category: 'Groceries', stock: 24 },
+        { id: 2, name: 'Fortune Sunflower Oil (1L)', brand: 'Fortune', image: '🫒', mrp: 175, selling_price: 149,
+            category: 'Groceries', stock: 12 },
+        { id: 3, name: 'India Gate Basmati Rice (1kg)', brand: 'India Gate', image: '🍚', mrp: 220, selling_price: 195,
+            category: 'Rice & Grains', stock: 8 },
+        { id: 4, name: 'Tata Salt (1kg)', brand: 'Tata', image: '🧂', mrp: 28, selling_price: 22,
+            category: 'Groceries', stock: 45 },
+        { id: 5, name: 'Surf Excel Matic (1kg)', brand: 'Surf Excel', image: '🧺', mrp: 180, selling_price: 165,
+            category: 'Household', stock: 0 },
+        { id: 6, name: 'Wheel Detergent (1kg)', brand: 'Wheel', image: '🧺', mrp: 95, selling_price: 85,
+            category: 'Household', stock: 30 },
+        { id: 7, name: 'Rin Soap (4-pack)', brand: 'Rin', image: '🧼', mrp: 60, selling_price: 52,
+            category: 'Household', stock: 18 },
+        { id: 8, name: 'Good Day Biscuits (500g)', brand: 'Good Day', image: '🍪', mrp: 75, selling_price: 65,
+            category: 'Snacks', stock: 22 },
+        { id: 9, name: 'Parle G (1kg)', brand: 'Parle', image: '🍪', mrp: 120, selling_price: 105,
+            category: 'Snacks', stock: 40 },
+        { id: 10, name: 'Maggi Noodles (12-pack)', brand: 'Maggi', image: '🍜', mrp: 120, selling_price: 108,
+            category: 'Snacks', stock: 15 },
+        { id: 11, name: 'Amul Butter (500g)', brand: 'Amul', image: '🧈', mrp: 95, selling_price: 85,
+            category: 'Dairy', stock: 20 },
+        { id: 12, name: 'Amul Milk (1L)', brand: 'Amul', image: '🥛', mrp: 60, selling_price: 54,
+            category: 'Dairy', stock: 35 },
+        { id: 13, name: 'Nescafe Classic (50g)', brand: 'Nescafe', image: '☕', mrp: 180, selling_price: 165,
+            category: 'Beverages', stock: 10 },
+        { id: 14, name: 'Bru Instant Coffee (50g)', brand: 'Bru', image: '☕', mrp: 150, selling_price: 135,
+            category: 'Beverages', stock: 14 },
+        { id: 15, name: 'Taj Mahal Tea (250g)', brand: 'Taj Mahal', image: '🍵', mrp: 85, selling_price: 75,
+            category: 'Beverages', stock: 25 },
+        { id: 16, name: 'Tata Tea Premium (250g)', brand: 'Tata Tea', image: '🍵', mrp: 90, selling_price: 80,
+            category: 'Beverages', stock: 20 },
+        { id: 17, name: 'Red Label Tea (250g)', brand: 'Red Label', image: '🍵', mrp: 70, selling_price: 62,
+            category: 'Beverages', stock: 18 },
+        { id: 18, name: 'Saffola Gold Oil (1L)', brand: 'Saffola', image: '🫒', mrp: 195, selling_price: 175,
+            category: 'Groceries', stock: 10 },
+        { id: 19, name: 'Sunflower Oil (1L)', brand: 'Sunflower', image: '🫒', mrp: 160, selling_price: 145,
+            category: 'Groceries', stock: 8 },
+        { id: 20, name: 'Sugar (1kg)', brand: 'Madhur', image: '🍬', mrp: 45, selling_price: 40,
+            category: 'Groceries', stock: 50 },
+        { id: 21, name: 'Jaggery (1kg)', brand: 'Organic', image: '🍯', mrp: 80, selling_price: 70,
+            category: 'Groceries', stock: 12 },
+        { id: 22, name: 'Moong Dal (1kg)', brand: 'Tata Sampann', image: '🫘', mrp: 120, selling_price: 108,
+            category: 'Groceries', stock: 22 },
+        { id: 23, name: 'Toor Dal (1kg)', brand: 'Tata Sampann', image: '🫘', mrp: 140, selling_price: 125,
+            category: 'Groceries', stock: 18 },
+        { id: 24, name: 'Masoor Dal (1kg)', brand: 'Tata Sampann', image: '🫘', mrp: 100, selling_price: 90,
+            category: 'Groceries', stock: 20 },
+        { id: 25, name: 'Rajma (1kg)', brand: 'Tata Sampann', image: '🫘', mrp: 130, selling_price: 118,
+            category: 'Groceries', stock: 15 },
+        { id: 26, name: 'Chana (1kg)', brand: 'Tata Sampann', image: '🫘', mrp: 90, selling_price: 80,
+            category: 'Groceries', stock: 25 },
+        { id: 27, name: 'Besan (1kg)', brand: 'Tata Sampann', image: '🧆', mrp: 85, selling_price: 76,
+            category: 'Groceries', stock: 14 },
+        { id: 28, name: 'Poha (1kg)', brand: 'Patanjali', image: '🍚', mrp: 55, selling_price: 48,
+            category: 'Groceries', stock: 30 },
+        { id: 29, name: 'Rava (1kg)', brand: 'Patanjali', image: '🍚', mrp: 50, selling_price: 44,
+            category: 'Groceries', stock: 28 },
+        { id: 30, name: 'Suji (1kg)', brand: 'Patanjali', image: '🍚', mrp: 48, selling_price: 42,
+            category: 'Groceries', stock: 26 },
+        { id: 31, name: 'Turmeric Powder (100g)', brand: 'MDH', image: '🌿', mrp: 45, selling_price: 38,
+            category: 'Spices', stock: 40 },
+        { id: 32, name: 'Red Chilli Powder (100g)', brand: 'MDH', image: '🌶️', mrp: 50, selling_price: 42,
+            category: 'Spices', stock: 35 },
+        { id: 33, name: 'Coriander Powder (100g)', brand: 'MDH', image: '🌿', mrp: 35, selling_price: 28,
+            category: 'Spices', stock: 38 },
+        { id: 34, name: 'Jeera (100g)', brand: 'MDH', image: '🌿', mrp: 40, selling_price: 32,
+            category: 'Spices', stock: 30 },
+        { id: 35, name: 'Mustard Seeds (100g)', brand: 'MDH', image: '🌿', mrp: 30, selling_price: 24,
+            category: 'Spices', stock: 25 },
+        { id: 36, name: 'Black Pepper (100g)', brand: 'MDH', image: '🌿', mrp: 80, selling_price: 70,
+            category: 'Spices', stock: 20 },
+        { id: 37, name: 'Dettol Soap (2-pack)', brand: 'Dettol', image: '🧼', mrp: 70, selling_price: 62,
+            category: 'Personal Care', stock: 30 },
+        { id: 38, name: 'Shampoo (200ml)', brand: 'Dove', image: '🧴', mrp: 180, selling_price: 165,
+            category: 'Personal Care', stock: 18 },
+        { id: 39, name: 'Toothpaste (150g)', brand: 'Colgate', image: '🪥', mrp: 95, selling_price: 85,
+            category: 'Personal Care', stock: 25 },
+        { id: 40, name: 'Toothbrush', brand: 'Colgate', image: '🪥', mrp: 40, selling_price: 32,
+            category: 'Personal Care', stock: 40 },
+        { id: 41, name: 'Harpic (500ml)', brand: 'Harpic', image: '🧹', mrp: 85, selling_price: 75,
+            category: 'Household', stock: 20 },
+        { id: 42, name: 'Lizol (500ml)', brand: 'Lizol', image: '🧹', mrp: 90, selling_price: 80,
+            category: 'Household', stock: 18 },
+        { id: 43, name: 'Floor Cleaner (1L)', brand: 'Domex', image: '🧹', mrp: 60, selling_price: 52,
+            category: 'Household', stock: 22 },
+        { id: 44, name: 'Phenyl (1L)', brand: 'Savlon', image: '🧹', mrp: 50, selling_price: 42,
+            category: 'Household', stock: 15 },
+        { id: 45, name: 'Toilet Cleaner (500ml)', brand: 'Harpic', image: '🧹', mrp: 75, selling_price: 65,
+            category: 'Household', stock: 14 },
+        { id: 46, name: 'Nestle Milk (1L)', brand: 'Nestle', image: '🥛', mrp: 65, selling_price: 58,
+            category: 'Dairy', stock: 28 },
+        { id: 47, name: 'Amul Cheese (500g)', brand: 'Amul', image: '🧀', mrp: 110, selling_price: 98,
+            category: 'Dairy', stock: 12 },
+        { id: 48, name: 'Nestle Curd (500g)', brand: 'Nestle', image: '🥛', mrp: 55, selling_price: 48,
+            category: 'Dairy', stock: 16 },
+        { id: 49, name: 'Amul Ice Cream (1L)', brand: 'Amul', image: '🍦', mrp: 150, selling_price: 135,
+            category: 'Dairy', stock: 10 },
+        { id: 50, name: 'Nestle Maggie Soup', brand: 'Nestle', image: '🍜', mrp: 45, selling_price: 38,
+            category: 'Snacks', stock: 20 },
+        // Additional products generated dynamically below
+    ];
+
+    // Generate more products to reach 200+
+    const brands = ['Aashirvaad', 'Fortune', 'India Gate', 'Tata', 'Surf Excel', 'Wheel', 'Rin', 'Good Day', 'Parle',
+        'Maggi', 'Amul', 'Nestle', 'Nescafe', 'Bru', 'Taj Mahal', 'Red Label', 'Saffola', 'Sunflower', 'Madhur',
+        'Organic', 'Tata Sampann', 'Patanjali', 'MDH', 'Dettol', 'Dove', 'Colgate', 'Harpic', 'Lizol', 'Domex',
+        'Savlon'
+    ];
+    const categories = ['Groceries', 'Dairy', 'Beverages', 'Snacks', 'Household', 'Rice & Grains', 'Spices',
+        'Personal Care'
+    ];
+    const productNames = ['Atta (5kg)', 'Oil (1L)', 'Rice (1kg)', 'Salt (1kg)', 'Detergent (1kg)', 'Soap (4-pack)',
+        'Biscuits (500g)', 'Noodles (12-pack)', 'Butter (500g)', 'Milk (1L)', 'Coffee (50g)', 'Tea (250g)',
+        'Sugar (1kg)', 'Jaggery (1kg)', 'Dal (1kg)', 'Rajma (1kg)', 'Chana (1kg)', 'Besan (1kg)', 'Poha (1kg)',
+        'Rava (1kg)', 'Turmeric (100g)', 'Chilli Powder (100g)', 'Coriander (100g)', 'Jeera (100g)',
+        'Mustard (100g)', 'Pepper (100g)', 'Soap (2-pack)', 'Shampoo (200ml)', 'Toothpaste (150g)',
+        'Toothbrush', 'Floor Cleaner (1L)', 'Phenyl (1L)', 'Toilet Cleaner (500ml)', 'Cheese (500g)',
+        'Curd (500g)', 'Ice Cream (1L)', 'Soup (pack)'
+    ];
+    let idCounter = 51;
+    for (let i = 0; i < 180; i++) {
+        const brand = brands[i % brands.length];
+        const name = productNames[i % productNames.length];
+        const category = categories[i % categories.length];
+        const mrp = Math.floor(Math.random() * 200) + 20;
+        const selling_price = Math.floor(mrp * (0.7 + Math.random() * 0.25));
+        PRODUCTS.push({
+            id: idCounter++,
+            name: brand + ' ' + name,
+            brand: brand,
+            image: ['🌾', '🫒', '🍚', '🧂', '🧺', '🧼', '🍪', '🍜', '🧈', '🥛', '☕', '🍵', '🍬', '🍯', '🫘', '🧆', '🌿',
+                '🌶️', '🧴', '🪥', '🧹'
+            ][i % 21],
+            mrp: mrp,
+            selling_price: selling_price,
+            category: category,
+            stock: Math.floor(Math.random() * 50) + 1
         });
-        this.channel = (name) => ({
-            on: (event, filter, callback) => {
-                console.log(`[Supabase] Realtime channel ${name} listening`);
-                // Simulate realtime events
-                setInterval(() => {
-                    callback({ new: { id: Date.now(), status: 'pending' } });
-                }, 30000);
-                return this;
-            },
-            subscribe: () => {
-                console.log(`[Supabase] Subscribed to channel ${name}`);
-                return this;
-            }
-        });
-        this.removeChannel = (channel) => {
-            console.log(`[Supabase] Removed channel`);
-        };
     }
-}
 
-// Mock data helper
-function getMockData(table) {
-    const mockDB = {
-        customers: [
-            { id: 1, name: 'Priya Sharma', phone: '+91 98765 43210', state: 'Maharashtra', district: 'Mumbai', city: 'Mumbai', pincode: '400001', language: 'English' },
-            { id: 2, name: 'Amit Singh', phone: '+91 87654 32109', state: 'Delhi', district: 'Delhi', city: 'Delhi', pincode: '110001', language: 'Hindi' },
-        ],
-        shopkeepers: [
-            { id: 1, owner_name: 'Rajesh Kumar', shop_name: 'FreshMart Grocery', gst: '22ABCDE1234F1Z5', phone: '+91 98765 43210', address: 'Shop No. 12, Main Bazaar', category: 'Grocery', opening: '8:00 AM', closing: '10:00 PM', upi: 'freshmart@upi' },
-        ],
-        products: [
-            { id: 1, name: 'Aashirvaad Atta (5kg)', brand: 'Aashirvaad', image: '🛒', mrp: 210, selling_price: 185, category: 'Groceries', barcode: '8901234567890', gst: 5, unit: 'kg', stock: 24 },
-            { id: 2, name: 'Fortune Sunflower Oil (1L)', brand: 'Fortune', image: '🛒', mrp: 175, selling_price: 149, category: 'Groceries', barcode: '8901234567891', gst: 5, unit: 'L', stock: 12 },
-            // ... more products
-        ],
-        orders: [
-            { id: 'ORD-1024', customer_id: 1, shopkeeper_id: 1, status: 'completed', total: 245, created_at: '2026-08-03T10:30:00' },
-            { id: 'ORD-1023', customer_id: 2, shopkeeper_id: 1, status: 'processing', total: 680, created_at: '2026-08-03T09:15:00' },
-            { id: 'ORD-1022', customer_id: 1, shopkeeper_id: 1, status: 'pending', total: 432.5, created_at: '2026-08-02T18:45:00' },
-        ],
-        order_items: [
-            { order_id: 'ORD-1024', product_id: 1, quantity: 2, price: 185 },
-            { order_id: 'ORD-1024', product_id: 2, quantity: 1, price: 149 },
-            { order_id: 'ORD-1023', product_id: 3, quantity: 1, price: 195 },
-        ],
-        bills: [
-            { id: 1, order_id: 'ORD-1024', invoice_no: 'INV-2026-001', total: 729.70, created_at: '2026-08-03T10:45:00' },
-        ],
-        payments: [
-            { id: 1, order_id: 'ORD-1024', amount: 729.70, method: 'UPI', status: 'completed', created_at: '2026-08-03T10:45:00' },
-        ],
-        credit_ledger: [
-            { id: 1, customer_id: 1, shopkeeper_id: 1, type: 'credit', amount: 500, description: 'Payment received', date: '2026-08-03T10:30:00' },
-            { id: 2, customer_id: 1, shopkeeper_id: 1, type: 'debit', amount: 520, description: 'Order #ORD-1028', date: '2026-08-03T09:15:00' },
-        ],
-        inventory: [
-            { product_id: 1, quantity: 24, low_stock_threshold: 10 },
-            { product_id: 2, quantity: 12, low_stock_threshold: 10 },
-        ],
-        notifications: [
-            { id: 1, user_id: 1, message: 'New order #ORD-1028 from Meera Patel', read: false, created_at: '2026-08-03T10:32:00' },
-        ],
-    };
-    return mockDB[table] || [];
-}
+    // ============================================================
+    // 2. STATE
+    // ============================================================
+    let cart = JSON.parse(localStorage.getItem('udharkart_cart')) || [];
+    let currentPage = 'customer-dashboard';
+    let currentCategory = 'all';
 
-// Instantiate Supabase client
-const supabase = new SupabaseClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
-
-// ============================================================
-// 3. UTILITY FUNCTIONS
-// ============================================================
-const Utils = {
-    // Format currency
-    formatCurrency: (amount) => {
+    // ============================================================
+    // 3. UTILITY FUNCTIONS
+    // ============================================================
+    function formatCurrency(amount) {
         return '₹' + Number(amount).toFixed(2);
-    },
-    // Format date
-    formatDate: (dateString) => {
-        const d = new Date(dateString);
-        return d.toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-    },
-    // Generate random ID
-    generateId: () => {
+    }
+
+    function generateId() {
         return 'ID-' + Date.now().toString(36) + Math.random().toString(36).substring(2, 5);
-    },
-    // Debounce
-    debounce: (func, wait) => {
-        let timeout;
-        return function(...args) {
-            clearTimeout(timeout);
-            timeout = setTimeout(() => func.apply(this, args), wait);
-        };
-    },
-    // Deep clone
-    clone: (obj) => JSON.parse(JSON.stringify(obj)),
-    // Get URL params
-    getParams: () => {
-        const params = new URLSearchParams(window.location.search);
-        return Object.fromEntries(params.entries());
     }
-};
 
-// ============================================================
-// 4. STORAGE (localStorage wrapper)
-// ============================================================
-const Storage = {
-    get: (key, defaultValue = null) => {
-        try {
-            const data = localStorage.getItem('udharkart_' + key);
-            return data ? JSON.parse(data) : defaultValue;
-        } catch {
-            return defaultValue;
+    function showToast(message, type = 'info') {
+        const container = document.getElementById('toastContainer');
+        if (!container) {
+            // Fallback: create container if missing
+            const newContainer = document.createElement('div');
+            newContainer.id = 'toastContainer';
+            newContainer.className = 'toast-container';
+            document.body.appendChild(newContainer);
         }
-    },
-    set: (key, value) => {
-        localStorage.setItem('udharkart_' + key, JSON.stringify(value));
-    },
-    remove: (key) => {
-        localStorage.removeItem('udharkart_' + key);
-    },
-    // Cart specific
-    getCart: () => Storage.get('cart', []),
-    saveCart: (cart) => Storage.set('cart', cart),
-    // Wishlist
-    getWishlist: () => Storage.get('wishlist', []),
-    saveWishlist: (wishlist) => Storage.set('wishlist', wishlist),
-    // Theme
-    getTheme: () => Storage.get('theme', 'light'),
-    saveTheme: (theme) => Storage.set('theme', theme),
-};
-
-// ============================================================
-// 5. VALIDATION
-// ============================================================
-const Validator = {
-    isPhone: (phone) => {
-        return /^[0-9]{10}$/.test(phone.replace(/\D/g, ''));
-    },
-    isEmail: (email) => {
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    },
-    isPincode: (pincode) => {
-        return /^[0-9]{6}$/.test(pincode);
-    },
-    isGST: (gst) => {
-        return /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/.test(gst);
-    },
-    required: (value) => {
-        return value && value.trim().length > 0;
-    },
-    minLength: (value, min) => {
-        return value && value.length >= min;
-    },
-    maxLength: (value, max) => {
-        return value && value.length <= max;
-    },
-    validateForm: (formData, rules) => {
-        const errors = {};
-        for (const [field, rule] of Object.entries(rules)) {
-            const value = formData[field] || '';
-            if (rule.required && !Validator.required(value)) {
-                errors[field] = 'This field is required';
-            } else if (rule.min && value.length < rule.min) {
-                errors[field] = `Minimum ${rule.min} characters required`;
-            } else if (rule.max && value.length > rule.max) {
-                errors[field] = `Maximum ${rule.max} characters allowed`;
-            } else if (rule.pattern && !rule.pattern.test(value)) {
-                errors[field] = rule.message || 'Invalid format';
-            }
-        }
-        return errors;
-    }
-};
-
-// ============================================================
-// 6. AUTHENTICATION
-// ============================================================
-const Auth = {
-    currentUser: null,
-    currentRole: null,
-
-    init: async () => {
-        const session = Storage.get('session', null);
-        if (session) {
-            Auth.currentUser = session.user;
-            Auth.currentRole = session.role;
-            return true;
-        }
-        return false;
-    },
-
-    loginWithOTP: async (phone, role) => {
-        try {
-            const { data, error } = await supabase.auth.signInWithOtp(phone);
-            if (error) throw error;
-            // Store phone temporarily for verification
-            Storage.set('otp_phone', phone);
-            Storage.set('otp_role', role);
-            return { success: true, message: 'OTP sent to ' + phone };
-        } catch (error) {
-            return { success: false, message: error.message };
-        }
-    },
-
-    verifyOTP: async (token) => {
-        try {
-            const phone = Storage.get('otp_phone');
-            const role = Storage.get('otp_role');
-            if (!phone) throw new Error('Phone number not found');
-            const { data, error } = await supabase.auth.verifyOtp(phone, token);
-            if (error) throw error;
-            // Set user
-            Auth.currentUser = data.user;
-            Auth.currentRole = role;
-            Storage.set('session', { user: data.user, role });
-            Storage.remove('otp_phone');
-            Storage.remove('otp_role');
-            // Navigate based on role
-            const dashboard = role === 'customer' ? 'customer-dashboard' :
-                             role === 'shopkeeper' ? 'shopkeeper-dashboard' :
-                             'admin-dashboard';
-            Router.navigate(dashboard);
-            return { success: true };
-        } catch (error) {
-            return { success: false, message: error.message };
-        }
-    },
-
-    logout: async () => {
-        await supabase.auth.signOut();
-        Auth.currentUser = null;
-        Auth.currentRole = null;
-        Storage.remove('session');
-        Router.navigate('login');
-    },
-
-    getRole: () => Auth.currentRole,
-    getUser: () => Auth.currentUser,
-    isAuthenticated: () => !!Auth.currentUser,
-};
-
-// ============================================================
-// 7. ROUTER
-// ============================================================
-const Router = {
-    routes: {
-        'customer-dashboard': { title: 'Dashboard', subtitle: 'Welcome back' },
-        'shopkeeper-dashboard': { title: 'Shop Dashboard', subtitle: 'Manage your store' },
-        'admin-dashboard': { title: 'Admin Panel', subtitle: 'Platform oversight' },
-        'products': { title: 'Products', subtitle: 'Browse our catalog' },
-        'categories': { title: 'Categories', subtitle: 'Shop by category' },
-        'cart': { title: 'Shopping Cart', subtitle: 'Review your items' },
-        'orders': { title: 'Orders', subtitle: 'Track your orders' },
-        'billing': { title: 'Billing', subtitle: 'Generate invoices' },
-        'digital-khata': { title: 'Digital Khata', subtitle: 'Manage credit ledger' },
-        'customer-list': { title: 'Customers', subtitle: 'Manage customer accounts' },
-        'inventory': { title: 'Inventory', subtitle: 'Stock management' },
-        'reports': { title: 'Reports', subtitle: 'Business insights' },
-        'analytics': { title: 'Analytics', subtitle: 'Data & metrics' },
-        'profile': { title: 'Profile', subtitle: 'Your account details' },
-        'settings': { title: 'Settings', subtitle: 'App preferences' },
-        'notifications': { title: 'Notifications', subtitle: 'Recent alerts' },
-        'support': { title: 'Support', subtitle: 'Help & resources' },
-        'login': { title: 'Login', subtitle: 'Sign in to your account' },
-        'register': { title: 'Register', subtitle: 'Create new account' },
-        '404': { title: '404', subtitle: 'Page not found' },
-        'maintenance': { title: 'Maintenance', subtitle: 'Under construction' },
-    },
-
-    currentPage: 'customer-dashboard',
-
-    navigate: (pageId, params = {}) => {
-        // If login/register, handle separately
-        if (pageId === 'login' || pageId === 'register') {
-            // Hide all sections and show login/register overlay? For simplicity, we'll just show the page.
-            // In real app, we might have separate HTML.
-            // For now, we'll just use the same logic.
-        }
-        // Hide all page sections
-        document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
-        const target = document.getElementById('page-' + pageId);
-        if (target) {
-            target.classList.add('active');
-            Router.currentPage = pageId;
-            // Update nav links
-            document.querySelectorAll('.sidebar-nav .nav-link').forEach(link => {
-                link.classList.toggle('active', link.dataset.page === pageId);
-            });
-            // Update title
-            const info = Router.routes[pageId] || { title: pageId, subtitle: '' };
-            document.getElementById('pageTitle').textContent = info.title;
-            document.getElementById('pageSubtitle').textContent = info.subtitle || '';
-            // Close sidebar on mobile
-            UI.closeSidebar();
-            // Close notification dropdown
-            UI.closeNotifications();
-            // Trigger page-specific load
-            Router.onPageChange(pageId);
-        } else {
-            // 404
-            Router.navigate('404');
-        }
-    },
-
-    onPageChange: (pageId) => {
-        // Load data for specific pages
-        switch (pageId) {
-            case 'customer-dashboard':
-                Dashboard.loadCustomerStats();
-                break;
-            case 'shopkeeper-dashboard':
-                Dashboard.loadShopkeeperStats();
-                break;
-            case 'admin-dashboard':
-                Dashboard.loadAdminStats();
-                break;
-            case 'products':
-                Products.loadProducts();
-                break;
-            case 'cart':
-                Cart.renderCart();
-                break;
-            case 'orders':
-                Orders.loadOrders();
-                break;
-            case 'billing':
-                Billing.loadInvoiceData();
-                break;
-            case 'digital-khata':
-                Khata.loadLedger();
-                break;
-            case 'inventory':
-                Inventory.loadInventory();
-                break;
-            case 'notifications':
-                Notifications.loadNotifications();
-                break;
-            case 'profile':
-                Profile.loadProfile();
-                break;
-            default:
-                break;
-        }
-    }
-};
-
-// ============================================================
-// 8. UI HELPERS
-// ============================================================
-const UI = {
-    closeSidebar: () => {
-        document.getElementById('sidebar')?.classList.remove('open');
-        document.getElementById('sidebarOverlay')?.classList.remove('active');
-    },
-    openSidebar: () => {
-        document.getElementById('sidebar')?.classList.add('open');
-        document.getElementById('sidebarOverlay')?.classList.add('active');
-    },
-    closeNotifications: () => {
-        document.getElementById('notifDropdown')?.classList.remove('open');
-    },
-    toggleNotifications: () => {
-        document.getElementById('notifDropdown')?.classList.toggle('open');
-    },
-    showToast: (message, type = 'info') => {
-        // Simple toast implementation
         const toast = document.createElement('div');
-        toast.className = `toast toast-${type}`;
+        toast.className = 'toast ' + type;
         toast.textContent = message;
-        toast.style.cssText = `
-            position: fixed; bottom: 24px; right: 24px;
-            padding: 12px 24px; border-radius: var(--radius-sm);
-            background: var(--gray-900); color: white;
-            font-family: var(--font-sans); font-size: 0.9rem;
-            box-shadow: var(--shadow-lg); z-index: 9999;
-            animation: fadeIn 0.3s ease;
-        `;
-        if (type === 'success') toast.style.background = 'var(--success)';
-        else if (type === 'error') toast.style.background = 'var(--danger)';
-        else if (type === 'warning') toast.style.background = 'var(--warning)';
-        document.body.appendChild(toast);
+        document.getElementById('toastContainer').appendChild(toast);
         setTimeout(() => {
             toast.style.opacity = '0';
             toast.style.transform = 'translateY(20px)';
             setTimeout(() => toast.remove(), 300);
         }, 3000);
-    },
-    confirm: (message) => {
-        return confirm(message);
-    },
-    // Render skeleton loader
-    showSkeleton: (container, count = 3) => {
-        container.innerHTML = '';
-        for (let i = 0; i < count; i++) {
-            const skeleton = document.createElement('div');
-            skeleton.className = 'skeleton';
-            skeleton.style.cssText = `
-                height: 80px; background: var(--gray-200); border-radius: var(--radius-sm);
-                animation: pulse 1.5s infinite;
-            `;
-            container.appendChild(skeleton);
-        }
-    },
-};
-
-// ============================================================
-// 9. DASHBOARD
-// ============================================================
-const Dashboard = {
-    loadCustomerStats: async () => {
-        // Fetch stats from API
-        const stats = {
-            totalOrders: 24,
-            pendingUdhar: 4320,
-            savedCarts: 3,
-            favorites: 18,
-        };
-        document.querySelector('.stats-grid .stat-value')?.forEach((el, idx) => {
-            const values = [stats.totalOrders, stats.pendingUdhar, stats.savedCarts, stats.favorites];
-            if (el) el.textContent = idx === 1 ? '₹' + values[idx] : values[idx];
-        });
-        // Load recent orders
-        const orders = await Orders.getOrders();
-        const orderContainer = document.querySelector('.order-item')?.parentElement;
-        if (orderContainer) {
-            orderContainer.innerHTML = '';
-            orders.slice(0, 3).forEach(order => {
-                const item = document.createElement('div');
-                item.className = 'order-item';
-                item.innerHTML = `
-                    <span class="order-status ${order.status}"></span>
-                    <div class="order-info">
-                        <div class="order-id">#${order.id}</div>
-                        <div class="order-meta">${order.customer_name || 'Customer'} • ${order.items || 0} items • ${Utils.formatDate(order.created_at)}</div>
-                    </div>
-                    <div class="order-amount">${Utils.formatCurrency(order.total)}</div>
-                    <span class="badge-status ${order.status}">${order.status}</span>
-                `;
-                orderContainer.appendChild(item);
-            });
-        }
-    },
-    loadShopkeeperStats: async () => {
-        // Similar
-        const stats = {
-            todayRevenue: 8420,
-            monthlyRevenue: 142300,
-            pendingUdhar: 24580,
-            newOrders: 12,
-        };
-        // Update stat cards
-    },
-    loadAdminStats: async () => {
-        // Admin stats
     }
-};
 
-// ============================================================
-// 10. PRODUCTS
-// ============================================================
-const Products = {
-    products: [],
-    categories: [],
+    function getProductById(id) {
+        return PRODUCTS.find(p => p.id === id);
+    }
 
-    loadProducts: async (category = null) => {
-        let query = supabase.from('products').select('*');
-        if (category) {
-            query = query.eq('category', category);
+    // ============================================================
+    // 4. NAVIGATION
+    // ============================================================
+    function navigateTo(page) {
+        // Hide all sections
+        document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
+        const target = document.getElementById('page-' + page);
+        if (target) {
+            target.classList.add('active');
+            currentPage = page;
+            // Update nav links
+            document.querySelectorAll('.sidebar-nav .nav-link').forEach(link => {
+                link.classList.toggle('active', link.dataset.page === page);
+            });
+            // Update title
+            const titles = {
+                'customer-dashboard': { title: 'Dashboard', sub: 'Welcome back, Rajesh' },
+                'shopkeeper-dashboard': { title: 'Shop Dashboard', sub: 'Manage your store' },
+                'admin-dashboard': { title: 'Admin Panel', sub: 'Platform oversight' },
+                'products': { title: 'Products', sub: 'Browse our catalog' },
+                'categories': { title: 'Categories', sub: 'Shop by category' },
+                'cart': { title: 'Shopping Cart', sub: 'Review your items' },
+                'orders': { title: 'Orders', sub: 'Track your orders' },
+                'billing': { title: 'Billing', sub: 'Generate invoices' },
+                'digital-khata': { title: 'Digital Khata', sub: 'Manage credit ledger' },
+                'customer-list': { title: 'Customers', sub: 'Manage customer accounts' },
+                'inventory': { title: 'Inventory', sub: 'Stock management' },
+                'reports': { title: 'Reports', sub: 'Business insights' },
+                'analytics': { title: 'Analytics', sub: 'Data & metrics' },
+                'profile': { title: 'Profile', sub: 'Your account details' },
+                'settings': { title: 'Settings', sub: 'App preferences' },
+                'notifications': { title: 'Notifications', sub: 'Recent alerts' },
+                'support': { title: 'Support', sub: 'Help & resources' },
+            };
+            const info = titles[page] || { title: page, sub: '' };
+            document.getElementById('pageTitle').textContent = info.title;
+            document.getElementById('pageSubtitle').textContent = info.sub;
+            // Close sidebar on mobile
+            closeSidebar();
+            document.getElementById('notifDropdown').classList.remove('open');
+            // Page-specific load
+            if (page === 'products') renderProducts(currentCategory);
+            if (page === 'cart') renderCart();
+            if (page === 'billing') renderInvoice();
+            if (page === 'digital-khata') renderKhata();
+            if (page === 'profile') loadProfile();
         }
-        const { data, error } = await query.then(res => res);
-        if (error) {
-            console.error('Error loading products:', error);
-            return;
-        }
-        Products.products = data || [];
-        Products.renderProducts(data);
-    },
+    }
 
-    renderProducts: (products) => {
-        const grid = document.querySelector('.product-grid');
+    function closeSidebar() {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('active');
+    }
+
+    // ============================================================
+    // 5. PRODUCTS
+    // ============================================================
+    function renderProducts(category) {
+        const grid = document.getElementById('productGrid');
         if (!grid) return;
+        const filtered = category === 'all' ? PRODUCTS : PRODUCTS.filter(p => p.category === category);
         grid.innerHTML = '';
-        products.forEach(product => {
+        filtered.slice(0, 24).forEach(product => {
             const card = document.createElement('div');
             card.className = 'product-card';
+            const inCart = cart.find(c => c.id === product.id);
             card.innerHTML = `
                 <div class="product-img">${product.image || '🛒'}</div>
                 <div class="product-body">
                     <div class="name">${product.name}</div>
-                    <div class="brand">${product.brand || ''}</div>
+                    <div class="brand">${product.brand}</div>
                     <div class="price">
-                        <span class="mrp">${Utils.formatCurrency(product.mrp)}</span>
-                        <span class="sell">${Utils.formatCurrency(product.selling_price)}</span>
+                        <span class="mrp">${formatCurrency(product.mrp)}</span>
+                        <span class="sell">${formatCurrency(product.selling_price)}</span>
                     </div>
-                    <button class="btn btn-primary btn-sm add-btn" data-product-id="${product.id}">Add to Cart</button>
+                    <button class="btn ${inCart ? 'btn-success' : 'btn-primary'} btn-sm add-btn" data-id="${product.id}">
+                        ${inCart ? '✓ In Cart' : 'Add to Cart'}
+                    </button>
                 </div>
             `;
             grid.appendChild(card);
         });
-        // Attach add to cart events
+        // Attach add to cart
         grid.querySelectorAll('.add-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
+            btn.addEventListener('click', function(e) {
                 e.stopPropagation();
-                const id = parseInt(btn.dataset.productId);
-                const product = Products.products.find(p => p.id === id);
-                if (product) Cart.addItem(product);
+                const id = parseInt(this.dataset.id);
+                addToCart(id);
             });
         });
-    },
-
-    searchProducts: async (query) => {
-        // Simulate search
-        const { data } = await supabase.from('products').select('*').then(res => res);
-        const filtered = data.filter(p => p.name.toLowerCase().includes(query.toLowerCase()) || p.brand.toLowerCase().includes(query.toLowerCase()));
-        Products.renderProducts(filtered);
-    },
-
-    loadCategories: async () => {
-        // Mock categories
-        const categories = [
-            { name: 'Groceries', count: 48 },
-            { name: 'Dairy', count: 32 },
-            { name: 'Beverages', count: 27 },
-            { name: 'Snacks', count: 39 },
-            { name: 'Household', count: 22 },
-            { name: 'Rice & Grains', count: 18 },
-            { name: 'Spices', count: 25 },
-            { name: 'Personal Care', count: 30 },
-        ];
-        Products.categories = categories;
-        // Render categories if needed
     }
-};
 
-// ============================================================
-// 11. CART
-// ============================================================
-const Cart = {
-    items: [],
-
-    init: () => {
-        Cart.items = Storage.getCart();
-        Cart.renderCart();
-    },
-
-    addItem: (product, quantity = 1) => {
-        const existing = Cart.items.find(item => item.product.id === product.id);
+    // ============================================================
+    // 6. CART
+    // ============================================================
+    function addToCart(productId) {
+        const product = getProductById(productId);
+        if (!product) return;
+        const existing = cart.find(c => c.id === productId);
         if (existing) {
-            existing.quantity += quantity;
+            existing.quantity += 1;
         } else {
-            Cart.items.push({ product, quantity });
+            cart.push({ id: productId, quantity: 1, price: product.selling_price, name: product.name,
+                image: product.image });
         }
-        Storage.saveCart(Cart.items);
-        Cart.renderCart();
-        UI.showToast(`${product.name} added to cart`, 'success');
-    },
+        localStorage.setItem('udharkart_cart', JSON.stringify(cart));
+        renderCart();
+        updateCartBadge();
+        showToast(product.name + ' added to cart', 'success');
+        // Update product grid buttons
+        document.querySelectorAll('.add-btn[data-id="' + productId + '"]').forEach(btn => {
+            btn.textContent = '✓ In Cart';
+            btn.className = 'btn btn-success btn-sm add-btn';
+        });
+    }
 
-    removeItem: (productId) => {
-        Cart.items = Cart.items.filter(item => item.product.id !== productId);
-        Storage.saveCart(Cart.items);
-        Cart.renderCart();
-    },
+    function removeFromCart(productId) {
+        cart = cart.filter(c => c.id !== productId);
+        localStorage.setItem('udharkart_cart', JSON.stringify(cart));
+        renderCart();
+        updateCartBadge();
+        document.querySelectorAll('.add-btn[data-id="' + productId + '"]').forEach(btn => {
+            btn.textContent = 'Add to Cart';
+            btn.className = 'btn btn-primary btn-sm add-btn';
+        });
+    }
 
-    updateQuantity: (productId, delta) => {
-        const item = Cart.items.find(item => item.product.id === productId);
+    function updateQuantity(productId, delta) {
+        const item = cart.find(c => c.id === productId);
         if (!item) return;
         item.quantity += delta;
         if (item.quantity <= 0) {
-            Cart.removeItem(productId);
+            removeFromCart(productId);
             return;
         }
-        Storage.saveCart(Cart.items);
-        Cart.renderCart();
-    },
+        localStorage.setItem('udharkart_cart', JSON.stringify(cart));
+        renderCart();
+        updateCartBadge();
+    }
 
-    clearCart: () => {
-        Cart.items = [];
-        Storage.saveCart(Cart.items);
-        Cart.renderCart();
-    },
+    function clearCart() {
+        if (cart.length === 0) return;
+        if (confirm('Clear all items from cart?')) {
+            cart = [];
+            localStorage.setItem('udharkart_cart', JSON.stringify(cart));
+            renderCart();
+            updateCartBadge();
+            showToast('Cart cleared', 'info');
+        }
+    }
 
-    renderCart: () => {
-        const container = document.querySelector('.cart-items-container');
+    function renderCart() {
+        const container = document.getElementById('cartContainer');
+        const count = document.getElementById('cartCount');
+        const subtotalEl = document.getElementById('cartSubtotal');
+        const gstEl = document.getElementById('cartGst');
+        const totalEl = document.getElementById('cartTotal');
         if (!container) return;
-        if (Cart.items.length === 0) {
-            container.innerHTML = `<div class="empty-state"><span class="material-symbols-rounded">shopping_cart</span><h3>Your cart is empty</h3><p>Add items from the product catalog</p></div>`;
+
+        if (cart.length === 0) {
+            container.innerHTML =
+                `<div class="empty-state"><span class="material-symbols-rounded">shopping_cart</span><h3>Your cart is empty</h3><p>Add items from the product catalog</p></div>`;
+            if (count) count.textContent = '0';
+            if (subtotalEl) subtotalEl.textContent = '₹0';
+            if (gstEl) gstEl.textContent = '₹0';
+            if (totalEl) totalEl.textContent = '₹0';
             return;
         }
+
         let html = '';
         let subtotal = 0;
-        Cart.items.forEach(item => {
-            const total = item.product.selling_price * item.quantity;
+        cart.forEach(item => {
+            const product = getProductById(item.id);
+            if (!product) return;
+            const total = product.selling_price * item.quantity;
             subtotal += total;
             html += `
-                <div class="cart-item" data-product-id="${item.product.id}">
-                    <div class="item-img">${item.product.image || '🛒'}</div>
+                <div class="cart-item" data-id="${item.id}">
+                    <div class="item-img">${product.image || '🛒'}</div>
                     <div class="item-info">
-                        <div class="item-name">${item.product.name}</div>
-                        <div class="item-brand">${item.product.brand || ''}</div>
+                        <div class="item-name">${product.name}</div>
+                        <div class="item-brand">${product.brand}</div>
                     </div>
-                    <div class="item-price">${Utils.formatCurrency(item.product.selling_price)}</div>
+                    <div class="item-price">${formatCurrency(product.selling_price)}</div>
                     <div class="qty-control">
-                        <button class="qty-minus" data-id="${item.product.id}">−</button>
+                        <button class="qty-minus" data-id="${item.id}">−</button>
                         <span class="qty">${item.quantity}</span>
-                        <button class="qty-plus" data-id="${item.product.id}">+</button>
+                        <button class="qty-plus" data-id="${item.id}">+</button>
                     </div>
-                    <button class="btn btn-icon-sm btn-ghost remove-item" data-id="${item.product.id}">
+                    <button class="btn btn-icon-sm btn-ghost remove-item" data-id="${item.id}">
                         <span class="material-symbols-rounded">delete</span>
                     </button>
                 </div>
             `;
         });
         container.innerHTML = html;
+
         // Attach events
         container.querySelectorAll('.qty-minus').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const id = parseInt(btn.dataset.id);
-                Cart.updateQuantity(id, -1);
-            });
+            btn.addEventListener('click', () => updateQuantity(parseInt(btn.dataset.id), -1));
         });
         container.querySelectorAll('.qty-plus').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const id = parseInt(btn.dataset.id);
-                Cart.updateQuantity(id, 1);
-            });
+            btn.addEventListener('click', () => updateQuantity(parseInt(btn.dataset.id), 1));
         });
         container.querySelectorAll('.remove-item').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const id = parseInt(btn.dataset.id);
-                Cart.removeItem(id);
+            btn.addEventListener('click', () => removeFromCart(parseInt(btn.dataset.id)));
+        });
+
+        if (count) count.textContent = cart.reduce((sum, c) => sum + c.quantity, 0);
+        const gst = subtotal * 0.05;
+        const grand = subtotal + gst;
+        if (subtotalEl) subtotalEl.textContent = formatCurrency(subtotal);
+        if (gstEl) gstEl.textContent = formatCurrency(gst);
+        if (totalEl) totalEl.textContent = formatCurrency(grand);
+    }
+
+    function updateCartBadge() {
+        const badge = document.getElementById('cartBadge');
+        if (!badge) return;
+        const count = cart.reduce((sum, c) => sum + c.quantity, 0);
+        badge.textContent = count;
+        badge.style.display = count > 0 ? 'block' : 'none';
+    }
+
+    // ============================================================
+    // 7. OFFERS & FAVORITES (dashboard)
+    // ============================================================
+    function renderOffers() {
+        const grid = document.getElementById('offerGrid');
+        if (!grid) return;
+        const offers = PRODUCTS.slice(0, 4);
+        grid.innerHTML = '';
+        offers.forEach(product => {
+            const card = document.createElement('div');
+            card.className = 'product-card';
+            card.innerHTML = `
+                <div class="product-img">${product.image || '🛒'}</div>
+                <div class="product-body">
+                    <div class="name">${product.name}</div>
+                    <div class="brand">${product.brand}</div>
+                    <div class="price"><span class="mrp">${formatCurrency(product.mrp)}</span><span class="sell">${formatCurrency(product.selling_price)}</span></div>
+                    <button class="btn btn-primary btn-sm add-btn" data-id="${product.id}">Add to Cart</button>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+        grid.querySelectorAll('.add-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                addToCart(parseInt(this.dataset.id));
             });
         });
-        // Update totals
-        const totalEl = document.querySelector('.cart-total');
-        if (totalEl) {
-            const gst = subtotal * 0.05;
-            const grand = subtotal + gst;
-            totalEl.innerHTML = `
-                <div>Subtotal: ${Utils.formatCurrency(subtotal)}</div>
-                <div>GST (5%): ${Utils.formatCurrency(gst)}</div>
-                <div><strong>Total: ${Utils.formatCurrency(grand)}</strong></div>
-            `;
-        }
-    },
-
-    getTotal: () => {
-        let subtotal = 0;
-        Cart.items.forEach(item => {
-            subtotal += item.product.selling_price * item.quantity;
-        });
-        const gst = subtotal * 0.05;
-        return { subtotal, gst, grand: subtotal + gst };
     }
-};
 
-// ============================================================
-// 12. ORDERS
-// ============================================================
-const Orders = {
-    orders: [],
-
-    loadOrders: async () => {
-        const { data } = await supabase.from('orders').select('*').then(res => res);
-        Orders.orders = data || [];
-        Orders.renderOrders(data);
-    },
-
-    renderOrders: (orders) => {
-        const container = document.querySelector('.orders-list');
-        if (!container) return;
-        container.innerHTML = '';
-        orders.forEach(order => {
-            const item = document.createElement('div');
-            item.className = 'order-item';
-            item.innerHTML = `
-                <span class="order-status ${order.status}"></span>
-                <div class="order-info">
-                    <div class="order-id">#${order.id}</div>
-                    <div class="order-meta">${order.customer_name || 'Customer'} • ${order.items || 0} items • ${Utils.formatDate(order.created_at)}</div>
+    function renderFavorites() {
+        const grid = document.getElementById('favoriteGrid');
+        if (!grid) return;
+        const favs = PRODUCTS.slice(4, 8);
+        grid.innerHTML = '';
+        favs.forEach(product => {
+            const card = document.createElement('div');
+            card.className = 'product-card';
+            card.innerHTML = `
+                <div class="product-img">${product.image || '🛒'}</div>
+                <div class="product-body">
+                    <div class="name">${product.name}</div>
+                    <div class="brand">${product.brand}</div>
+                    <div class="price"><span class="mrp">${formatCurrency(product.mrp)}</span><span class="sell">${formatCurrency(product.selling_price)}</span></div>
+                    <button class="btn btn-outline btn-sm add-btn" data-id="${product.id}">Add to Cart</button>
                 </div>
-                <div class="order-amount">${Utils.formatCurrency(order.total)}</div>
-                <span class="badge-status ${order.status}">${order.status}</span>
             `;
-            container.appendChild(item);
+            grid.appendChild(card);
         });
-    },
-
-    placeOrder: async (cartItems, customerId, shopkeeperId, paymentMethod) => {
-        // Calculate totals
-        let total = 0;
-        cartItems.forEach(item => {
-            total += item.product.selling_price * item.quantity;
+        grid.querySelectorAll('.add-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                addToCart(parseInt(this.dataset.id));
+            });
         });
-        const orderData = {
-            id: 'ORD-' + Date.now().toString().slice(-6),
-            customer_id: customerId,
-            shopkeeper_id: shopkeeperId,
-            status: 'pending',
-            total: total,
-            created_at: new Date().toISOString(),
-            items: cartItems.map(item => ({
-                product_id: item.product.id,
-                quantity: item.quantity,
-                price: item.product.selling_price
-            }))
-        };
-        // Insert order
-        const { data, error } = await supabase.from('orders').insert(orderData).then(res => res);
-        if (error) {
-            UI.showToast('Order failed: ' + error.message, 'error');
-            return false;
-        }
-        // Clear cart
-        Cart.clearCart();
-        UI.showToast('Order placed successfully!', 'success');
-        // Navigate to orders
-        Router.navigate('orders');
-        return true;
     }
-};
 
-// ============================================================
-// 13. BILLING
-// ============================================================
-const Billing = {
-    loadInvoiceData: () => {
-        // Mock invoice data
+    // ============================================================
+    // 8. BILLING / INVOICE
+    // ============================================================
+    function renderInvoice() {
+        const box = document.getElementById('invoiceBox');
+        if (!box) return;
         const invoice = {
             invoice_no: 'INV-2026-001',
             date: new Date().toISOString(),
@@ -851,18 +500,15 @@ const Billing = {
             grand_total: 729.70,
             payment_method: 'UPI'
         };
-        // Render invoice
-        const container = document.querySelector('.invoice-box');
-        if (!container) return;
-        // Build HTML
         let itemsHtml = '';
         invoice.items.forEach((item, idx) => {
-            itemsHtml += `<tr><td>${idx+1}</td><td>${item.name}</td><td>${item.qty}</td><td>${Utils.formatCurrency(item.price)}</td><td>${Utils.formatCurrency(item.total)}</td></tr>`;
+            itemsHtml +=
+                `<tr><td>${idx+1}</td><td>${item.name}</td><td>${item.qty}</td><td>${formatCurrency(item.price)}</td><td>${formatCurrency(item.total)}</td></tr>`;
         });
-        container.innerHTML = `
+        box.innerHTML = `
             <div class="invoice-header">
                 <div><div class="brand">Udhar<span>Kart</span></div><div style="font-size:0.85rem;color:var(--gray-500);">Smart Shopping • Digital Khata</div></div>
-                <div class="invoice-meta"><strong>Invoice #:</strong> ${invoice.invoice_no}<br/><strong>Date:</strong> ${Utils.formatDate(invoice.date)}</div>
+                <div class="invoice-meta"><strong>Invoice #:</strong> ${invoice.invoice_no}<br/><strong>Date:</strong> ${new Date(invoice.date).toLocaleString('en-IN')}</div>
             </div>
             <div class="invoice-details">
                 <div class="detail-group"><h4>Bill To</h4><p>${invoice.customer.name}<br/>${invoice.customer.phone}<br/>${invoice.customer.address}</p></div>
@@ -873,429 +519,513 @@ const Billing = {
                 <tbody>${itemsHtml}</tbody>
             </table>
             <div class="invoice-totals">
-                <div class="total-row"><span>Subtotal</span><span>${Utils.formatCurrency(invoice.subtotal)}</span></div>
-                <div class="total-row"><span>GST (5%)</span><span>${Utils.formatCurrency(invoice.gst)}</span></div>
-                <div class="total-row"><span>Discount</span><span>−${Utils.formatCurrency(invoice.discount)}</span></div>
-                <div class="total-row grand"><span>Grand Total</span><span>${Utils.formatCurrency(invoice.grand_total)}</span></div>
+                <div class="total-row"><span>Subtotal</span><span>${formatCurrency(invoice.subtotal)}</span></div>
+                <div class="total-row"><span>GST (5%)</span><span>${formatCurrency(invoice.gst)}</span></div>
+                <div class="total-row"><span>Discount</span><span>-${formatCurrency(invoice.discount)}</span></div>
+                <div class="total-row grand"><span>Grand Total</span><span>${formatCurrency(invoice.grand_total)}</span></div>
             </div>
             <div class="invoice-footer">Thank you for shopping with UdharKart! • Payment: ${invoice.payment_method} • QR Code: [Generated]</div>
         `;
-    },
-
-    printInvoice: () => {
-        window.print();
-    },
-
-    generatePDF: () => {
-        UI.showToast('PDF generation will be available soon.', 'info');
     }
-};
 
-// ============================================================
-// 14. KHATA (LEDGER)
-// ============================================================
-const Khata = {
-    entries: [],
-
-    loadLedger: async () => {
-        const { data } = await supabase.from('credit_ledger').select('*').then(res => res);
-        Khata.entries = data || [];
-        Khata.renderLedger(data);
-    },
-
-    renderLedger: (entries) => {
-        const container = document.querySelector('.khata-list');
-        if (!container) return;
-        container.innerHTML = '';
+    // ============================================================
+    // 9. KHATA (LEDGER)
+    // ============================================================
+    function renderKhata() {
+        const list = document.getElementById('khataList');
+        if (!list) return;
+        const entries = [
+            { type: 'credit', amount: 500, description: 'Payment received from Priya Sharma',
+                date: 'Today, 10:30 AM • UPI' },
+            { type: 'debit', amount: 520, description: 'Order #ORD-1028 — Meera Patel',
+                date: 'Today, 9:15 AM • Udhar' },
+            { type: 'credit', amount: 450, description: 'Payment received from Amit Singh',
+                date: 'Yesterday, 6:45 PM • Cash' },
+            { type: 'debit', amount: 310, description: 'Order #ORD-1026 — Sneha Reddy',
+                date: 'Yesterday, 4:20 PM • Udhar' },
+            { type: 'debit', amount: 245, description: 'Order #ORD-1024 — Priya Sharma',
+                date: 'Yesterday, 10:30 AM • Udhar' },
+        ];
+        list.innerHTML = '';
         entries.forEach(entry => {
             const div = document.createElement('div');
             div.className = 'khata-entry';
             const typeClass = entry.type === 'credit' ? 'credit' : 'debit';
             const icon = entry.type === 'credit' ? 'payments' : 'shopping_bag';
-            const amount = entry.type === 'credit' ? `+${Utils.formatCurrency(entry.amount)}` : `-${Utils.formatCurrency(entry.amount)}`;
+            const amount = entry.type === 'credit' ? `+${formatCurrency(entry.amount)}` :
+                `-${formatCurrency(entry.amount)}`;
             div.innerHTML = `
                 <div class="entry-icon ${typeClass}"><span class="material-symbols-rounded">${icon}</span></div>
-                <div class="entry-info">
-                    <div class="entry-title">${entry.description}</div>
-                    <div class="entry-date">${Utils.formatDate(entry.date)}</div>
-                </div>
+                <div class="entry-info"><div class="entry-title">${entry.description}</div><div class="entry-date">${entry.date}</div></div>
                 <div class="entry-amount ${typeClass}">${amount}</div>
             `;
-            container.appendChild(div);
+            list.appendChild(div);
         });
-    },
-
-    addEntry: async (data) => {
-        // data: { customer_id, shopkeeper_id, type, amount, description }
-        const { error } = await supabase.from('credit_ledger').insert(data).then(res => res);
-        if (!error) {
-            UI.showToast('Entry added', 'success');
-            Khata.loadLedger();
-        } else {
-            UI.showToast('Failed to add entry', 'error');
-        }
     }
-};
 
-// ============================================================
-// 15. INVENTORY
-// ============================================================
-const Inventory = {
-    loadInventory: async () => {
-        const { data } = await supabase.from('inventory').select('*').then(res => res);
-        Inventory.renderInventory(data);
-    },
+    // ============================================================
+    // 10. PROFILE
+    // ============================================================
+    function loadProfile() {
+        const elements = {
+            fullName: document.getElementById('profileFullName'),
+            phone: document.getElementById('profilePhone'),
+            shopName: document.getElementById('profileShopName'),
+            gst: document.getElementById('profileGst'),
+            address: document.getElementById('profileAddress'),
+            opening: document.getElementById('profileOpening'),
+            closing: document.getElementById('profileClosing'),
+            upi: document.getElementById('profileUpi'),
+            nameDisplay: document.getElementById('profileName'),
+            roleDisplay: document.getElementById('profileRole'),
+        };
+        if (elements.fullName) elements.fullName.value = 'Rajesh Kumar';
+        if (elements.phone) elements.phone.value = '+91 98765 43210';
+        if (elements.shopName) elements.shopName.value = 'FreshMart Grocery';
+        if (elements.gst) elements.gst.value = '22ABCDE1234F1Z5';
+        if (elements.address) elements.address.value = 'Shop No. 12, Main Bazaar, Mumbai';
+        if (elements.opening) elements.opening.value = '8:00 AM';
+        if (elements.closing) elements.closing.value = '10:00 PM';
+        if (elements.upi) elements.upi.value = 'freshmart@upi';
+        if (elements.nameDisplay) elements.nameDisplay.textContent = 'Rajesh Kumar';
+        if (elements.roleDisplay) elements.roleDisplay.textContent = 'Shopkeeper • FreshMart Grocery';
+    }
 
-    renderInventory: (inventory) => {
-        const container = document.querySelector('.inventory-table tbody');
-        if (!container) return;
-        container.innerHTML = '';
-        inventory.forEach(item => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td data-label="Product">${item.product_name || 'Product'}</td>
-                <td data-label="Category">${item.category || 'General'}</td>
-                <td data-label="Stock">${item.quantity}</td>
-                <td data-label="Price">${Utils.formatCurrency(item.price || 0)}</td>
-                <td data-label="Status"><span class="badge-status ${item.quantity > 10 ? 'completed' : 'pending'}">${item.quantity > 10 ? 'In Stock' : 'Low Stock'}</span></td>
-            `;
-            container.appendChild(tr);
+    // ============================================================
+    // 11. THEME
+    // ============================================================
+    function setTheme(theme) {
+        if (theme === 'system') {
+            const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+        } else {
+            document.documentElement.setAttribute('data-theme', theme);
+        }
+        localStorage.setItem('udharkart_theme', theme);
+        const icon = document.querySelector('#themeToggle .material-symbols-rounded');
+        if (icon) {
+            const current = document.documentElement.getAttribute('data-theme');
+            icon.textContent = current === 'dark' ? 'light_mode' : 'dark_mode';
+        }
+        document.querySelectorAll('.theme-option').forEach(btn => {
+            btn.className = 'btn ' + (btn.dataset.theme === theme ? 'btn-primary' : 'btn-outline') +
+                ' btn-sm theme-option';
         });
-    },
-
-    updateStock: async (productId, quantity) => {
-        const { error } = await supabase.from('inventory').update({ quantity }).eq('product_id', productId).then(res => res);
-        if (!error) {
-            UI.showToast('Stock updated', 'success');
-            Inventory.loadInventory();
-        } else {
-            UI.showToast('Update failed', 'error');
-        }
     }
-};
 
-// ============================================================
-// 16. NOTIFICATIONS
-// ============================================================
-const Notifications = {
-    notifications: [],
-
-    loadNotifications: async () => {
-        const { data } = await supabase.from('notifications').select('*').then(res => res);
-        Notifications.notifications = data || [];
-        Notifications.renderNotifications(data);
-    },
-
-    renderNotifications: (notifs) => {
-        const container = document.querySelector('.notifications-list');
-        if (!container) return;
-        container.innerHTML = '';
-        notifs.forEach(notif => {
-            const div = document.createElement('div');
-            div.className = 'notif-item';
-            div.innerHTML = `
-                <span class="material-symbols-rounded notif-icon">notifications</span>
-                <div class="notif-text">
-                    <strong>${notif.message}</strong>
-                    <span class="time">${Utils.formatDate(notif.created_at)}</span>
+    // ============================================================
+    // 12. SEARCH
+    // ============================================================
+    function searchProducts(query) {
+        const results = PRODUCTS.filter(p =>
+            p.name.toLowerCase().includes(query.toLowerCase()) ||
+            p.brand.toLowerCase().includes(query.toLowerCase()) ||
+            p.category.toLowerCase().includes(query.toLowerCase())
+        );
+        const grid = document.getElementById('productGrid');
+        if (!grid) return;
+        grid.innerHTML = '';
+        if (results.length === 0) {
+            grid.innerHTML =
+                `<div class="empty-state" style="grid-column:1/-1;"><span class="material-symbols-rounded">search</span><h3>No products found</h3><p>Try a different search term</p></div>`;
+            return;
+        }
+        results.slice(0, 24).forEach(product => {
+            const card = document.createElement('div');
+            card.className = 'product-card';
+            const inCart = cart.find(c => c.id === product.id);
+            card.innerHTML = `
+                <div class="product-img">${product.image || '🛒'}</div>
+                <div class="product-body">
+                    <div class="name">${product.name}</div>
+                    <div class="brand">${product.brand}</div>
+                    <div class="price"><span class="mrp">${formatCurrency(product.mrp)}</span><span class="sell">${formatCurrency(product.selling_price)}</span></div>
+                    <button class="btn ${inCart ? 'btn-success' : 'btn-primary'} btn-sm add-btn" data-id="${product.id}">${inCart ? '✓ In Cart' : 'Add to Cart'}</button>
                 </div>
             `;
-            container.appendChild(div);
+            grid.appendChild(card);
         });
-    },
-
-    markAsRead: async (id) => {
-        // Update read status
-        const { error } = await supabase.from('notifications').update({ read: true }).eq('id', id).then(res => res);
-        if (!error) Notifications.loadNotifications();
+        grid.querySelectorAll('.add-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                addToCart(parseInt(this.dataset.id));
+            });
+        });
     }
-};
 
-// ============================================================
-// 17. PROFILE
-// ============================================================
-const Profile = {
-    loadProfile: () => {
-        // Mock user data
-        const user = Auth.currentUser || { name: 'Rajesh Kumar', phone: '+91 98765 43210', role: 'shopkeeper' };
-        const profileForm = document.querySelector('.profile-form');
-        if (!profileForm) return;
-        // Fill form fields
-        profileForm.querySelector('[name="name"]').value = user.name || '';
-        profileForm.querySelector('[name="phone"]').value = user.phone || '';
-        profileForm.querySelector('[name="role"]').value = user.role || '';
-        // For shopkeeper specific fields
-        if (user.role === 'shopkeeper') {
-            // Additional fields
+    // ============================================================
+    // 13. ORDER ACTIONS (Accept/Decline)
+    // ============================================================
+    function setupOrderActions() {
+        document.querySelectorAll('.accept-order').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const item = this.closest('.order-item');
+                const status = item.querySelector('.order-status');
+                const badge = item.querySelector('.badge-status');
+                status.className = 'order-status processing';
+                badge.className = 'badge-status processing';
+                badge.textContent = 'Processing';
+                this.remove();
+                const decline = item.querySelector('.decline-order');
+                if (decline) decline.remove();
+                showToast('Order accepted, packing started', 'success');
+            });
+        });
+        document.querySelectorAll('.decline-order').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const item = this.closest('.order-item');
+                const status = item.querySelector('.order-status');
+                const badge = item.querySelector('.badge-status');
+                status.className = 'order-status cancelled';
+                badge.className = 'badge-status cancelled';
+                badge.textContent = 'Cancelled';
+                this.remove();
+                const accept = item.querySelector('.accept-order');
+                if (accept) accept.remove();
+                showToast('Order declined', 'error');
+            });
+        });
+    }
+
+    // ============================================================
+    // 14. INITIALIZATION
+    // ============================================================
+    function init() {
+        // Restore theme
+        const savedTheme = localStorage.getItem('udharkart_theme') || 'light';
+        setTheme(savedTheme);
+
+        // Render initial data
+        renderProducts('all');
+        renderCart();
+        updateCartBadge();
+        renderOffers();
+        renderFavorites();
+        renderInvoice();
+        renderKhata();
+        loadProfile();
+        setupOrderActions();
+
+        // ===== NAVIGATION =====
+        document.querySelectorAll('.sidebar-nav .nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const page = this.dataset.page;
+                if (page) navigateTo(page);
+            });
+        });
+
+        document.querySelectorAll('[data-page]').forEach(el => {
+            if (el.classList.contains('nav-link')) return;
+            el.addEventListener('click', function(e) {
+                e.preventDefault();
+                const page = this.dataset.page;
+                if (page) navigateTo(page);
+            });
+        });
+
+        // ===== SIDEBAR TOGGLE =====
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        if (menuToggle) {
+            menuToggle.addEventListener('click', function() {
+                document.getElementById('sidebar').classList.toggle('open');
+                if (sidebarOverlay) sidebarOverlay.classList.toggle('active');
+            });
         }
-    },
-
-    updateProfile: async (data) => {
-        // Update user profile in DB
-        const { error } = await supabase.from('customers').update(data).eq('id', Auth.currentUser.id).then(res => res);
-        if (!error) {
-            UI.showToast('Profile updated', 'success');
-        } else {
-            UI.showToast('Update failed', 'error');
+        if (sidebarOverlay) {
+            sidebarOverlay.addEventListener('click', closeSidebar);
         }
-    }
-};
 
-// ============================================================
-// 18. SETTINGS
-// ============================================================
-const Settings = {
-    loadSettings: () => {
-        const theme = Storage.getTheme();
-        document.querySelector('#theme-select')?.value = theme;
-    },
-
-    setTheme: (theme) => {
-        Storage.saveTheme(theme);
-        document.documentElement.setAttribute('data-theme', theme);
-        UI.showToast(`Theme set to ${theme}`, 'info');
-    },
-
-    setLanguage: (lang) => {
-        // Change language (placeholder)
-        UI.showToast(`Language changed to ${lang}`, 'info');
-    },
-
-    toggleNotifications: (type, enabled) => {
-        const prefs = Storage.get('notif_prefs', {});
-        prefs[type] = enabled;
-        Storage.set('notif_prefs', prefs);
-    }
-};
-
-// ============================================================
-// 19. THEME (initialization)
-// ============================================================
-const Theme = {
-    init: () => {
-        const theme = Storage.getTheme() || 'light';
-        document.documentElement.setAttribute('data-theme', theme);
-        // Listen for theme toggle
-        document.querySelector('.theme-toggle')?.addEventListener('click', () => {
-            const current = document.documentElement.getAttribute('data-theme');
-            const next = current === 'light' ? 'dark' : 'light';
-            Settings.setTheme(next);
-        });
-    }
-};
-
-// ============================================================
-// 20. HELPERS & API
-// ============================================================
-const API = {
-    // Generic fetch wrapper
-    fetch: async (endpoint, options = {}) => {
-        const url = CONFIG.API_BASE + endpoint;
-        const response = await fetch(url, {
-            ...options,
-            headers: {
-                'Content-Type': 'application/json',
-                ...options.headers,
-            },
-        });
-        return response.json();
-    }
-};
-
-// ============================================================
-// 21. ANIMATIONS
-// ============================================================
-const Animations = {
-    init: () => {
-        // Add CSS for animations if not present
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
-            @keyframes slideIn { from { transform:translateX(-20px); opacity:0; } to { transform:translateX(0); opacity:1; } }
-            @keyframes pulse { 0% { opacity:0.6; } 50% { opacity:1; } 100% { opacity:0.6; } }
-            .fade-in { animation: fadeIn 0.3s ease; }
-            .slide-in { animation: slideIn 0.3s ease; }
-            .skeleton { animation: pulse 1.5s infinite; }
-        `;
-        document.head.appendChild(style);
-    }
-};
-
-// ============================================================
-// 22. MAIN INITIALIZATION
-// ============================================================
-document.addEventListener('DOMContentLoaded', async () => {
-    // Initialize theme
-    Theme.init();
-    Animations.init();
-
-    // Check authentication
-    const isAuthed = await Auth.init();
-    if (!isAuthed && !window.location.pathname.includes('login') && !window.location.pathname.includes('register')) {
-        // Redirect to login (but since we're in a single page, we navigate)
-        Router.navigate('login');
-        return;
-    }
-
-    // Setup event listeners
-    // Navigation links
-    document.querySelectorAll('.sidebar-nav .nav-link').forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            const page = link.dataset.page;
-            if (page) Router.navigate(page);
-        });
-    });
-
-    // "See all" links
-    document.querySelectorAll('[data-page]').forEach(el => {
-        if (el.classList.contains('nav-link')) return;
-        el.addEventListener('click', (e) => {
-            e.preventDefault();
-            const page = el.dataset.page;
-            if (page) Router.navigate(page);
-        });
-    });
-
-    // Sidebar toggle
-    document.getElementById('menuToggle')?.addEventListener('click', UI.openSidebar);
-    document.getElementById('sidebarOverlay')?.addEventListener('click', UI.closeSidebar);
-
-    // Notification toggle
-    document.getElementById('notifToggle')?.addEventListener('click', (e) => {
-        e.stopPropagation();
-        UI.toggleNotifications();
-    });
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('.notif-dropdown') && !e.target.closest('#notifToggle')) {
-            UI.closeNotifications();
+        // ===== NOTIFICATIONS DROPDOWN =====
+        const notifToggle = document.getElementById('notifToggle');
+        const notifDropdown = document.getElementById('notifDropdown');
+        if (notifToggle) {
+            notifToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (notifDropdown) notifDropdown.classList.toggle('open');
+            });
         }
-    });
-
-    // Global search
-    const searchInput = document.getElementById('globalSearch');
-    if (searchInput) {
-        searchInput.addEventListener('keydown', Utils.debounce(async (e) => {
-            if (e.key === 'Enter') {
-                const query = searchInput.value.trim();
-                if (query) {
-                    await Products.searchProducts(query);
+        document.addEventListener('click', function(e) {
+            if (notifDropdown && notifToggle) {
+                if (!notifDropdown.contains(e.target) && !notifToggle.contains(e.target)) {
+                    notifDropdown.classList.remove('open');
                 }
             }
-        }, 300));
+        });
+
+        // ===== CATEGORY TABS =====
+        document.querySelectorAll('#categoryTabs .tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('#categoryTabs .tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                currentCategory = this.dataset.category;
+                renderProducts(currentCategory);
+            });
+        });
+
+        // ===== ORDER TABS =====
+        document.querySelectorAll('#orderTabs .tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('#orderTabs .tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                const filter = this.dataset.filter;
+                document.querySelectorAll('#ordersList .order-item').forEach(item => {
+                    const status = item.querySelector('.badge-status')?.textContent.toLowerCase();
+                    if (filter === 'all') {
+                        item.style.display = 'flex';
+                    } else {
+                        item.style.display = status === filter ? 'flex' : 'none';
+                    }
+                });
+            });
+        });
+
+        // ===== CLEAR CART =====
+        const clearCartBtn = document.getElementById('clearCartBtn');
+        if (clearCartBtn) clearCartBtn.addEventListener('click', clearCart);
+
+        // ===== PLACE ORDER =====
+        const placeOrderBtn = document.getElementById('placeOrderBtn');
+        if (placeOrderBtn) {
+            placeOrderBtn.addEventListener('click', function() {
+                if (cart.length === 0) {
+                    showToast('Cart is empty', 'warning');
+                    return;
+                }
+                if (confirm('Place order with ' + cart.reduce((s, c) => s + c.quantity, 0) + ' items?')) {
+                    showToast('Order placed successfully!', 'success');
+                    cart = [];
+                    localStorage.setItem('udharkart_cart', JSON.stringify(cart));
+                    renderCart();
+                    updateCartBadge();
+                    navigateTo('orders');
+                }
+            });
+        }
+
+        // ===== PRINT INVOICE =====
+        const printBtn = document.getElementById('printInvoiceBtn');
+        if (printBtn) printBtn.addEventListener('click', () => window.print());
+
+        // ===== SAVE PROFILE =====
+        const saveProfileBtn = document.getElementById('saveProfileBtn');
+        if (saveProfileBtn) {
+            saveProfileBtn.addEventListener('click', function() {
+                showToast('Profile updated successfully!', 'success');
+            });
+        }
+
+        // ===== DELETE ACCOUNT =====
+        const deleteBtn = document.getElementById('deleteAccountBtn');
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', function() {
+                if (confirm('Are you sure you want to delete your account? This cannot be undone.')) {
+                    showToast('Account deletion request submitted', 'warning');
+                }
+            });
+        }
+
+        // ===== THEME TOGGLE =====
+        const themeToggle = document.getElementById('themeToggle');
+        if (themeToggle) {
+            themeToggle.addEventListener('click', function() {
+                const current = document.documentElement.getAttribute('data-theme');
+                const next = current === 'dark' ? 'light' : 'dark';
+                setTheme(next);
+            });
+        }
+
+        document.querySelectorAll('.theme-option').forEach(btn => {
+            btn.addEventListener('click', function() {
+                setTheme(this.dataset.theme);
+            });
+        });
+
+        // ===== SEARCH =====
+        const searchInput = document.getElementById('globalSearch');
+        if (searchInput) {
+            searchInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    const query = this.value.trim();
+                    if (query) {
+                        navigateTo('products');
+                        setTimeout(() => searchProducts(query), 100);
+                    }
+                }
+            });
+        }
+
+        // ===== VOICE SEARCH =====
+        const voiceBtn = document.getElementById('voiceSearchBtn');
+        if (voiceBtn) {
+            voiceBtn.addEventListener('click', function() {
+                if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+                    const recognition = new SR();
+                    recognition.lang = 'en-IN';
+                    recognition.onresult = function(event) {
+                        const transcript = event.results[0][0].transcript;
+                        if (searchInput) searchInput.value = transcript;
+                        navigateTo('products');
+                        setTimeout(() => searchProducts(transcript), 100);
+                    };
+                    recognition.start();
+                    showToast('Listening...', 'info');
+                } else {
+                    showToast('Voice search not supported in this browser', 'warning');
+                }
+            });
+        }
+
+        // ===== CUSTOMER SEARCH (shopkeeper) =====
+        const custSearchBtn = document.getElementById('customerSearchBtn');
+        if (custSearchBtn) {
+            custSearchBtn.addEventListener('click', function() {
+                const query = document.getElementById('customerSearchInput')?.value.trim();
+                if (query) {
+                    showToast('Searching for: "' + query + '"', 'info');
+                }
+            });
+        }
+
+        // ===== MARK ALL READ =====
+        document.querySelectorAll('#markAllRead, #markAllReadNotif').forEach(el => {
+            el.addEventListener('click', function() {
+                showToast('All notifications marked as read', 'success');
+            });
+        });
+
+        // ===== ADD KHATA ENTRY =====
+        const addKhataBtn = document.getElementById('addKhataEntryBtn');
+        if (addKhataBtn) {
+            addKhataBtn.addEventListener('click', function() {
+                const desc = prompt('Enter description:');
+                if (desc) {
+                    const amount = prompt('Enter amount (in ₹):');
+                    if (amount && !isNaN(amount)) {
+                        const type = confirm('Is this a payment received? (OK = Credit, Cancel = Debit)') ?
+                            'credit' : 'debit';
+                        const list = document.getElementById('khataList');
+                        if (list) {
+                            const div = document.createElement('div');
+                            div.className = 'khata-entry';
+                            const typeClass = type === 'credit' ? 'credit' : 'debit';
+                            const icon = type === 'credit' ? 'payments' : 'shopping_bag';
+                            const amt = type === 'credit' ? `+${formatCurrency(parseFloat(amount))}` :
+                                `-${formatCurrency(parseFloat(amount))}`;
+                            div.innerHTML = `
+                                <div class="entry-icon ${typeClass}"><span class="material-symbols-rounded">${icon}</span></div>
+                                <div class="entry-info"><div class="entry-title">${desc}</div><div class="entry-date">Just now</div></div>
+                                <div class="entry-amount ${typeClass}">${amt}</div>
+                            `;
+                            list.prepend(div);
+                            showToast('Khata entry added', 'success');
+                        }
+                    }
+                }
+            });
+        }
+
+        // ===== LOGOUT =====
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', function() {
+                if (confirm('Are you sure you want to logout?')) {
+                    localStorage.removeItem('udharkart_session');
+                    showToast('Logged out', 'info');
+                    navigateTo('customer-dashboard');
+                }
+            });
+        }
+
+        // ===== ADD STOCK =====
+        const addStockBtn = document.getElementById('addStockBtn');
+        if (addStockBtn) {
+            addStockBtn.addEventListener('click', function() {
+                const product = prompt('Enter product name:');
+                if (product) {
+                    const qty = prompt('Enter quantity to add:');
+                    if (qty && !isNaN(qty)) {
+                        showToast(`Added ${qty} units of ${product} to stock`, 'success');
+                    }
+                }
+            });
+        }
+
+        // ===== ADD PRODUCT =====
+        const addProductBtn = document.getElementById('addProductBtn');
+        if (addProductBtn) {
+            addProductBtn.addEventListener('click', function() {
+                const name = prompt('Enter product name:');
+                if (name) {
+                    const price = prompt('Enter selling price:');
+                    if (price && !isNaN(price)) {
+                        const brand = prompt('Enter brand:') || 'Generic';
+                        const category = prompt('Enter category:') || 'Groceries';
+                        const newProduct = {
+                            id: PRODUCTS.length + 1,
+                            name: name,
+                            brand: brand,
+                            image: '🛒',
+                            mrp: parseFloat(price) * 1.2,
+                            selling_price: parseFloat(price),
+                            category: category,
+                            stock: 10
+                        };
+                        PRODUCTS.push(newProduct);
+                        renderProducts(currentCategory);
+                        showToast('Product added: ' + name, 'success');
+                    }
+                }
+            });
+        }
+
+        // ===== LOAD MORE PRODUCTS =====
+        const loadMoreBtn = document.getElementById('loadMoreProducts');
+        if (loadMoreBtn) {
+            loadMoreBtn.addEventListener('click', function() {
+                const grid = document.getElementById('productGrid');
+                if (!grid) return;
+                const currentCount = grid.querySelectorAll('.product-card').length;
+                const filtered = currentCategory === 'all' ? PRODUCTS : PRODUCTS.filter(p => p.category ===
+                    currentCategory);
+                const more = filtered.slice(currentCount, currentCount + 12);
+                more.forEach(product => {
+                    const card = document.createElement('div');
+                    card.className = 'product-card';
+                    const inCart = cart.find(c => c.id === product.id);
+                    card.innerHTML = `
+                        <div class="product-img">${product.image || '🛒'}</div>
+                        <div class="product-body">
+                            <div class="name">${product.name}</div>
+                            <div class="brand">${product.brand}</div>
+                            <div class="price"><span class="mrp">${formatCurrency(product.mrp)}</span><span class="sell">${formatCurrency(product.selling_price)}</span></div>
+                            <button class="btn ${inCart ? 'btn-success' : 'btn-primary'} btn-sm add-btn" data-id="${product.id}">${inCart ? '✓ In Cart' : 'Add to Cart'}</button>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+                grid.querySelectorAll('.add-btn').forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        addToCart(parseInt(this.dataset.id));
+                    });
+                });
+                if (currentCount + 12 >= filtered.length) {
+                    this.style.display = 'none';
+                }
+            });
+        }
+
+        console.log('🚀 UdharKart initialized successfully!');
+        console.log('📦 ' + PRODUCTS.length + ' products loaded');
+        console.log('🛒 ' + cart.length + ' items in cart');
     }
 
-    // Cart quantity controls (delegated)
-    document.addEventListener('click', (e) => {
-        const target = e.target.closest('.qty-minus, .qty-plus');
-        if (target) {
-            const id = parseInt(target.dataset.id);
-            const delta = target.classList.contains('qty-plus') ? 1 : -1;
-            Cart.updateQuantity(id, delta);
-        }
-        const removeBtn = e.target.closest('.remove-item');
-        if (removeBtn) {
-            const id = parseInt(removeBtn.dataset.id);
-            Cart.removeItem(id);
-        }
-    });
+    // ============================================================
+    // 15. START
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', init);
 
-    // Add to cart buttons (delegated)
-    document.addEventListener('click', (e) => {
-        const addBtn = e.target.closest('.add-btn');
-        if (addBtn) {
-            const id = parseInt(addBtn.dataset.productId);
-            const product = Products.products.find(p => p.id === id);
-            if (product) Cart.addItem(product);
-        }
-    });
-
-    // Place order button
-    document.querySelector('.place-order-btn')?.addEventListener('click', async () => {
-        if (Cart.items.length === 0) {
-            UI.showToast('Cart is empty', 'warning');
-            return;
-        }
-        // Get current user
-        const user = Auth.currentUser;
-        if (!user) {
-            UI.showToast('Please login first', 'error');
-            return;
-        }
-        // For demo, assume customer ID = 1, shopkeeper ID = 1
-        const success = await Orders.placeOrder(Cart.items, 1, 1, 'UPI');
-        if (success) {
-            // Optionally navigate to orders
-        }
-    });
-
-    // Print invoice
-    document.querySelector('.print-invoice')?.addEventListener('click', Billing.printInvoice);
-
-    // Profile save
-    document.querySelector('.profile-save')?.addEventListener('click', () => {
-        const form = document.querySelector('.profile-form');
-        if (form) {
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData.entries());
-            Profile.updateProfile(data);
-        }
-    });
-
-    // Theme switch
-    document.querySelector('.theme-toggle')?.addEventListener('click', () => {
-        const current = document.documentElement.getAttribute('data-theme');
-        const next = current === 'light' ? 'dark' : 'light';
-        Settings.setTheme(next);
-    });
-
-    // Load initial page based on route
-    const initialPage = window.location.hash.replace('#', '') || 'customer-dashboard';
-    Router.navigate(initialPage);
-
-    // Listen to hash changes
-    window.addEventListener('hashchange', () => {
-        const page = window.location.hash.replace('#', '');
-        if (page) Router.navigate(page);
-    });
-
-    // Init cart
-    Cart.init();
-
-    // Load products
-    Products.loadProducts();
-
-    // Load categories
-    Products.loadCategories();
-
-    // Start realtime notifications
-    const channel = supabase.channel('public:orders');
-    channel.on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, (payload) => {
-        UI.showToast('New order received!', 'info');
-        // Reload orders if on orders page
-        if (Router.currentPage === 'orders') Orders.loadOrders();
-    }).subscribe();
-
-    console.log('UdharKart initialized!');
-});
-
-// ============================================================
-// EXPOSE GLOBALS (for debugging)
-// ============================================================
-window.UdharKart = {
-    Auth,
-    Router,
-    Cart,
-    Products,
-    Orders,
-    Billing,
-    Khata,
-    Inventory,
-    Notifications,
-    Profile,
-    Settings,
-    Utils,
-    Storage,
-    UI,
-    supabase,
-};
+})();
