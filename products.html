@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products • UdharKart</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>body{font-family:'Inter',system_ui,sans-serif}</style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950">
+    <div class="max-w-screen-2xl mx-auto px-8 py-8">
+        <div class="flex justify-between mb-8">
+            <div class="font-semibold text-3xl tracking-tight">All Products</div>
+            <input type="text" placeholder="Search..." class="px-5 py-3 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-3xl w-80 text-sm">
+        </div>
+        
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-5">
+            <!-- Product 1 -->
+            <div class="product-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-3xl overflow-hidden">
+                <div class="h-40 bg-slate-100 dark:bg-slate-800 flex items-center justify-center"><i class="fa-solid fa-wheat-awn text-6xl text-teal-900"></i></div>
+                <div class="p-4">
+                    <div class="font-semibold">Aashirvaad Atta 5kg</div>
+                    <div class="text-xs text-slate-500">MRP ₹285 • 14% off</div>
+                    <div class="mt-1 flex items-baseline"><span class="font-semibold text-xl">₹245</span></div>
+                    <button onclick="addToCart(this)" class="mt-4 w-full text-xs py-3 border border-teal-700 text-teal-700 font-medium rounded-3xl">Add to Cart</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="js/products.js"></script>
+</body>
+</html>

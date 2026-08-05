@@ -1,0 +1,10 @@
+/* UdharKart - Responsive Styles */
+@media (max-width: 768px) {
+    .section {
+        padding: 1rem;
+    }
+    
+    .premium-card {
+        padding: 1.5rem;
+    }
+}

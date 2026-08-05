@@ -1,0 +1,22 @@
+/* UdharKart - Design System Variables */
+:root {
+    --primary: #0F766E;
+    --secondary: #14B8A6;
+    --accent: #22C55E;
+    --error: #EF4444;
+    --warning: #F59E0B;
+    
+    --bg: #F8FAFC;
+    --bg-dark: #0F172A;
+    --card: #FFFFFF;
+    --card-dark: #0F172A;
+    
+    --text: #0F172A;
+    --text-secondary: #64748B;
+    
+    --border: #E2E8F0;
+    --border-dark: #334155;
+    
+    --radius: 1.25rem;
+    --shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+}

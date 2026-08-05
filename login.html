@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login • UdharKart</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body { font-family: 'Inter', system_ui, sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950">
+    <div class="max-w-md mx-auto px-6 pt-16">
+        <div class="flex justify-center mb-8">
+            <div class="flex items-center gap-x-2.5">
+                <div class="w-9 h-9 bg-teal-900 rounded-2xl flex items-center justify-center">
+                    <span class="text-white font-semibold text-2xl">U</span>
+                </div>
+                <span class="font-semibold text-3xl tracking-tighter">UdharKart</span>
+            </div>
+        </div>
+        
+        <div class="text-center mb-8">
+            <div class="font-semibold text-4xl tracking-tighter">Sign in</div>
+            <p class="text-slate-600 dark:text-slate-400 mt-1">Choose your account type</p>
+        </div>
+        
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-8 rounded-3xl">
+            <div class="flex gap-x-2 mb-8">
+                <button onclick="switchLoginType('customer')" id="login-customer-tab"
+                        class="flex-1 py-3 text-sm font-semibold bg-teal-900 text-white rounded-3xl">Customer</button>
+                <button onclick="switchLoginType('shopkeeper')" id="login-shopkeeper-tab"
+                        class="flex-1 py-3 text-sm font-semibold border border-slate-300 dark:border-slate-700 rounded-3xl">Shopkeeper</button>
+            </div>
+            
+            <form id="login-form" onsubmit="handleLogin(event)">
+                <div class="space-y-5">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Phone Number</label>
+                        <input type="tel" id="login-phone" placeholder="+91 98765 43210" required
+                               class="w-full px-5 py-4 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-3xl text-sm">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Password</label>
+                        <div class="relative">
+                            <input type="password" id="login-password" placeholder="Enter password" required
+                                   class="w-full px-5 py-4 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-3xl text-sm pr-12">
+                            <button type="button" onclick="togglePasswordVisibility('login-password')" class="absolute right-5 top-4 text-slate-400">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between text-sm">
+                        <label class="flex items-center gap-x-2">
+                            <input type="checkbox" checked> <span>Remember me</span>
+                        </label>
+                        <a href="#" onclick="showForgotPassword()" class="text-teal-700 font-medium">Forgot password?</a>
+                    </div>
+                    
+                    <button type="submit" class="mt-2 w-full py-4 bg-teal-900 text-white font-semibold rounded-3xl text-sm flex items-center justify-center">
+                        Sign In Securely
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <div class="text-center text-sm mt-8">
+            New to UdharKart? <a href="register.html" class="text-teal-700 font-medium">Create an account</a>
+        </div>
+    </div>
+    
+    <script src="js/auth.js"></script>
+</body>
+</html>

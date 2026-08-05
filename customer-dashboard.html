@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Dashboard • UdharKart</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>body{font-family:'Inter',system_ui,sans-serif}</style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950">
+    <nav class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-8 py-4 flex justify-between items-center">
+        <div class="flex items-center gap-x-2">
+            <div class="w-8 h-8 bg-teal-900 rounded-2xl flex items-center justify-center"><span class="font-bold text-white">U</span></div>
+            <span class="font-semibold tracking-tight">UdharKart</span>
+        </div>
+        <div class="flex items-center gap-x-6 text-sm">
+            <a href="products.html" class="font-medium">Shop</a>
+            <a href="cart.html" class="font-medium">Cart</a>
+            <a href="orders.html" class="font-medium">Orders</a>
+            <a href="udhar.html" class="font-medium">Udhar</a>
+            <a href="profile.html" class="font-medium">Profile</a>
+        </div>
+    </nav>
+    
+    <div class="max-w-screen-2xl mx-auto px-8 py-8">
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <div class="text-4xl font-semibold tracking-tighter">Good morning, Priya</div>
+                <div class="text-slate-600">Here's what's happening today</div>
+            </div>
+            <div>
+                <button onclick="location.href='products.html'" class="px-6 py-3 bg-teal-900 text-white text-sm font-semibold rounded-3xl">Browse Products</button>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <!-- Welcome Card -->
+            <div class="md:col-span-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-8 rounded-3xl">
+                <div class="font-semibold">Your Current Udhar</div>
+                <div class="mt-2 text-5xl font-semibold tracking-tighter">₹2,450</div>
+                <div class="text-sm text-emerald-600 mt-1">Due by 15 Feb • 3 days remaining</div>
+            </div>
+            
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-7 rounded-3xl">
+                <div class="text-xs font-medium">THIS MONTH</div>
+                <div class="text-4xl font-semibold tracking-tight mt-3">₹18,240</div>
+                <div class="text-emerald-600 text-xs mt-1">↑ 14% from last month</div>
+            </div>
+            
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-7 rounded-3xl">
+                <div>Recent Order</div>
+                <div class="mt-2 font-semibold">#ORD-3921</div>
+                <div class="text-xs mt-4 text-emerald-600">Delivered • ₹1,280</div>
+            </div>
+        </div>
+        
+        <div class="mt-10">
+            <div class="font-semibold mb-4">Quick Actions</div>
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+                <a href="products.html" class="px-5 py-4 bg-white border border-slate-200 dark:bg-slate-900 dark:border-slate-700 rounded-3xl text-center text-sm font-medium">Shop Now</a>
+                <a href="orders.html" class="px-5 py-4 bg-white border border-slate-200 dark:bg-slate-900 dark:border-slate-700 rounded-3xl text-center text-sm font-medium">Track Orders</a>
+                <a href="udhar.html" class="px-5 py-4 bg-white border border-slate-200 dark:bg-slate-900 dark:border-slate-700 rounded-3xl text-center text-sm font-medium">Pay Udhar</a>
+                <a href="billing.html" class="px-5 py-4 bg-white border border-slate-200 dark:bg-slate-900 dark:border-slate-700 rounded-3xl text-center text-sm font-medium">View Bills</a>
+                <a href="cart.html" class="px-5 py-4 bg-white border border-slate-200 dark:bg-slate-900 dark:border-slate-700 rounded-3xl text-center text-sm font-medium">View Cart</a>
+            </div>
+        </div>
+    </div>
+    
+    <script src="js/customer.js"></script>
+</body>
+</html>

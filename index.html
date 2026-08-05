@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UdharKart • Smart Shopping • Digital Khata • Instant Billing</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap');
+        
+        :root {
+            --primary: #0F766E;
+            --secondary: #14B8A6;
+        }
+        
+        body {
+            font-family: 'Inter', system_ui, sans-serif;
+        }
+        
+        .premium-shadow {
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+        }
+        
+        .glass {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+        }
+        
+        .dark .glass {
+            background: rgba(15, 23, 42, 0.95);
+        }
+        
+        .nav-link {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .nav-link:hover {
+            color: #0F766E;
+            transform: translateY(-1px);
+        }
+        
+        .product-card {
+            transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+        
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+        
+        .section {
+            display: none;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        .stat-number {
+            font-variant-numeric: tabular-nums;
+        }
+        
+        .udharkart-btn {
+            transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+        
+        .udharkart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgb(15 118 110 / 0.2);
+        }
+        
+        .premium-card {
+            transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+        
+        .premium-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+        
+        .nav-active {
+            color: #0F766E;
+            font-weight: 600;
+        }
+        
+        .metric-value {
+            font-feature-settings: "ss02";
+        }
+        
+        .skeleton {
+            animation: skeleton-loading 1.5s ease-in-out infinite;
+        }
+        
+        .page-transition {
+            animation: fadeInUp 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+        
+        .modal {
+            animation: modalEnter 0.2s cubic-bezier(0.32, 0.72, 0, 1);
+        }
+        
+        .nav-item {
+            position: relative;
+        }
+        
+        .nav-item.active:after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #0F766E;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
+    <!-- Top Navigation -->
+    <nav class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50">
+        <div class="max-w-screen-2xl mx-auto">
+            <div class="px-8 py-5 flex items-center justify-between">
+                <div class="flex items-center gap-x-3">
+                    <div class="flex items-center gap-x-2.5">
+                        <div class="w-9 h-9 bg-teal-900 rounded-2xl flex items-center justify-center">
+                            <span class="text-white font-semibold text-2xl tracking-tighter">U</span>
+                        </div>
+                        <div>
+                            <span class="font-semibold text-2xl tracking-tighter">UdharKart</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Desktop Nav -->
+                <div class="hidden md:flex items-center gap-x-8 text-sm">
+                    <a href="#" onclick="navigateTo('home')" class="nav-link text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-medium">Home</a>
+                    <a href="#" onclick="navigateTo('products')" class="nav-link text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-medium">Products</a>
+                    <a href="#" onclick="navigateTo('categories')" class="nav-link text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-medium">Categories</a>
+                    <a href="#" onclick="navigateTo('about')" class="nav-link text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-medium">About</a>
+                </div>
+                
+                <div class="flex items-center gap-x-3">
+                    <!-- Theme Toggle -->
+                    <button onclick="toggleTheme()" class="w-9 h-9 flex items-center justify-center text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                        <i class="fa-solid fa-moon text-lg dark:hidden"></i>
+                        <i class="fa-solid fa-sun text-lg hidden dark:block"></i>
+                    </button>
+                    
+                    <div class="flex items-center gap-x-2">
+                        <button onclick="navigateTo('login')" 
+                                class="px-5 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-3xl transition-all flex items-center gap-x-2">
+                            <i class="fa-solid fa-sign-in-alt"></i>
+                            <span class="hidden md:inline">Login</span>
+                        </button>
+                        
+                        <button onclick="navigateTo('register')" 
+                                class="px-5 py-2.5 bg-teal-900 hover:bg-teal-950 text-white text-sm font-semibold rounded-3xl transition-all flex items-center gap-x-2">
+                            <span>Get Started</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HOME SECTION -->
+    <div id="home" class="section active">
+        <!-- Hero Section -->
+        <div class="max-w-screen-2xl mx-auto px-8 pt-16 pb-24">
+            <div class="grid md:grid-cols-12 gap-12 items-center">
+                <div class="md:col-span-7">
+                    <div class="max-w-lg">
+                        <div class="inline-flex items-center gap-x-2 px-4 py-1.5 rounded-3xl bg-teal-100 dark:bg-teal-950 text-teal-800 dark:text-teal-300 text-sm font-medium mb-6">
+                            <div class="w-2 h-2 bg-teal-600 rounded-full animate-pulse"></div>
+                            Trusted by 18,400+ kirana stores
+                        </div>
+                        
+                        <h1 class="text-7xl leading-none font-semibold tracking-tighter">Smart Shopping.<br>Digital Khata.<br>Instant Billing.</h1>
+                        
+                        <p class="mt-6 text-xl text-slate-600 dark:text-slate-400 max-w-md">India's most premium platform for grocery retailers and customers. Built for scale. Designed for trust.</p>
+                        
+                        <div class="mt-9 flex items-center gap-x-4">
+                            <button onclick="navigateTo('login')" 
+                                    class="px-8 py-4 bg-teal-900 hover:bg-teal-950 transition-colors text-white text-base font-semibold rounded-3xl px-9 flex items-center gap-x-3 shadow-lg shadow-teal-900/30">
+                                <span>Customer Login</span>
+                            </button>
+                            <button onclick="navigateTo('login')" 
+                                    class="px-8 py-4 border border-slate-300 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-900 transition-all text-base font-semibold rounded-3xl px-8">
+                                Shopkeeper Login
+                            </button>
+                        </div>
+                        
+                        <div class="mt-8 flex items-center gap-x-8 text-sm">
+                            <div class="flex -space-x-2">
+                                <div class="w-8 h-8 bg-slate-200 border border-white rounded-full overflow-hidden"><img src="https://i.pravatar.cc/32?img=1" class="w-full"></div>
+                                <div class="w-8 h-8 bg-slate-200 border border-white rounded-full overflow-hidden"><img src="https://i.pravatar.cc/32?img=2" class="w-full"></div>
+                                <div class="w-8 h-8 bg-slate-200 border border-white rounded-full overflow-hidden"><img src="https://i.pravatar.cc/32?img=3" class="w-full"></div>
+                            </div>
+                            <div class="text-slate-500 dark:text-slate-400 text-sm">Join 184,291 happy users</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="md:col-span-5">
+                    <div class="bg-white dark:bg-slate-900 p-2 rounded-3xl premium-shadow border border-slate-100 dark:border-slate-800">
+                        <div class="aspect-video bg-slate-900 rounded-3xl overflow-hidden relative flex items-center justify-center">
+                            <div class="text-center">
+                                <div class="text-white/90 text-sm font-medium">Live Demo</div>
+                                <div class="text-6xl font-semibold text-white tracking-tighter mt-1">₹12.4L</div>
+                                <div class="text-teal-400 text-sm">Today's Revenue</div>
+                            </div>
+                            <div class="absolute bottom-6 right-6 px-4 py-1.5 bg-white/10 backdrop-blur-lg rounded-2xl text-white text-xs flex items-center gap-x-2">
+                                <i class="fa-solid fa-chart-line"></i>
+                                <span>Up 34%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Stats -->
+        <div class="max-w-screen-2xl mx-auto px-8 pb-16">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-px bg-slate-200 dark:bg-slate-800 rounded-3xl p-px">
+                <div class="bg-white dark:bg-slate-900 p-7 rounded-3xl">
+                    <div class="text-4xl font-semibold tracking-tighter">184k</div>
+                    <div class="text-sm text-slate-500 mt-1">Active Users</div>
+                </div>
+                <div class="bg-white dark:bg-slate-900 p-7 rounded-3xl">
+                    <div class="text-4xl font-semibold tracking-tighter">₹92Cr</div>
+                    <div class="text-sm text-slate-500 mt-1">GMV Processed</div>
+                </div>
+                <div class="bg-white dark:bg-slate-900 p-7 rounded-3xl">
+                    <div class="text-4xl font-semibold tracking-tighter">3.4L</div>
+                    <div class="text-sm text-slate-500 mt-1">Orders Today</div>
+                </div>
+                <div class="bg-white dark:bg-slate-900 p-7 rounded-3xl">
+                    <div class="text-4xl font-semibold tracking-tighter">98.4k</div>
+                    <div class="text-sm text-slate-500 mt-1">Udhar Cleared</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Features -->
+        <div class="max-w-screen-2xl mx-auto px-8 pb-20">
+            <div class="text-center mb-12">
+                <div class="text-teal-700 dark:text-teal-400 font-medium text-sm tracking-[1px]">BUILT FOR INDIA</div>
+                <div class="text-4xl font-semibold tracking-tighter mt-2">Everything you need to run a modern kirana business</div>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="premium-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-8 rounded-3xl">
+                    <i class="fa-solid fa-receipt text-3xl text-teal-700 mb-6"></i>
+                    <div class="font-semibold text-xl">Digital Khata</div>
+                    <div class="text-slate-600 dark:text-slate-400 mt-3 leading-relaxed">Track credit sales, customer ledgers, and automated reminders with beautiful UI.</div>
+                </div>
+                <div class="premium-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-8 rounded-3xl">
+                    <i class="fa-solid fa-qrcode text-3xl text-teal-700 mb-6"></i>
+                    <div class="font-semibold text-xl">Instant Billing</div>
+                    <div class="text-slate-600 dark:text-slate-400 mt-3 leading-relaxed">Generate GST invoices, print thermal receipts, and accept UPI, cards &amp; cash instantly.</div>
+                </div>
+                <div class="premium-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-8 rounded-3xl">
+                    <i class="fa-solid fa-chart-line text-3xl text-teal-700 mb-6"></i>
+                    <div class="font-semibold text-xl">Smart Analytics</div>
+                    <div class="text-slate-600 dark:text-slate-400 mt-3 leading-relaxed">Real-time insights on sales, margins, customer behavior, and inventory health.</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Testimonials -->
+        <div class="max-w-screen-2xl mx-auto px-8 pb-16">
+            <div class="text-center mb-10">
+                <div class="font-semibold text-3xl tracking-tight">Loved by the best retailers</div>
+            </div>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-7 rounded-3xl">
+                    <div class="flex items-center gap-x-4 mb-5">
+                        <img src="https://i.pravatar.cc/48?img=28" class="w-11 h-11 rounded-2xl">
+                        <div>
+                            <div class="font-semibold">Ramesh Patel</div>
+                            <div class="text-xs text-slate-500">Shree Krishna Stores, Ahmedabad</div>
+                        </div>
+                    </div>
+                    <div class="text-slate-600 dark:text-slate-400">"UdharKart has completely transformed how we manage credit. Our collections improved by 42%."</div>
+                </div>
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-7 rounded-3xl">
+                    <div class="flex items-center gap-x-4 mb-5">
+                        <img src="https://i.pravatar.cc/48?img=40" class="w-11 h-11 rounded-2xl">
+                        <div>
+                            <div class="font-semibold">Priya Sharma</div>
+                            <div class="text-xs text-slate-500">Grocery Hub, Jaipur</div>
+                        </div>
+                    </div>
+                    <div class="text-slate-600 dark:text-slate-400">"The billing experience is better than Blinkit. My customers love the seamless experience."</div>
+                </div>
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-7 rounded-3xl">
+                    <div class="flex items-center gap-x-4 mb-5">
+                        <img src="https://i.pravatar.cc/48?img=47" class="w-11 h-11 rounded-2xl">
+                        <div>
+                            <div class="font-semibold">Mohammed Farooq</div>
+                            <div class="text-xs text-slate-500">Al-Noor Mart, Hyderabad</div>
+                        </div>
+                    </div>
+                    <div class="text-slate-600 dark:text-slate-400">"Beautiful interface, reliable, and ready for the future. This is the future of kirana."</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- LOGIN SECTION -->
+    <div id="login" class="section">
+        <div class="max-w-md mx-auto px-6 pt-16">
+            <div class="text-center mb-9">
+                <div class="font-semibold text-4xl tracking-tighter">Welcome back</div>
+                <div class="text-slate-600 dark:text-slate-400 mt-2">Sign in to continue to UdharKart</div>
+            </div>
+            
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-8 rounded-3xl">
+                <div class="flex gap-x-2 mb-8">
+                    <button onclick="switchLoginType('customer')" id="login-customer-tab"
+                            class="flex-1 py-3 text-sm font-medium bg-teal-900 text-white rounded-3xl">Customer</button>
+                    <button onclick="switchLoginType('shopkeeper')" id="login-shopkeeper-tab"
+                            class="flex-1 py-3 text-sm font-medium border border-slate-300 dark:border-slate-700 rounded-3xl">Shopkeeper</button>
+                </div>
+                
+                <div id="login-form">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1.5">Phone Number</label>
+                            <input type="tel" id="login-phone" placeholder="+91 98765 43210" class="w-full px-4 py-3.5 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-3xl text-sm">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium mb-1.5">Password</label>
+                            <div class="relative">
+                                <input type="password" id="login-password" placeholder="••••••••" class="w-full px-4 py-3.5 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-3xl text-sm pr-12">
+                                <button onclick="togglePasswordVisibility('login-password')" class="absolute right-4 top-4 text-slate-400"><i class="fa-solid fa-eye"></i></button>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between text-sm">
+                            <label class="flex items-center gap-x-2">
+                                <input type="checkbox" class="rounded"> 
+                                <span class="text-sm">Remember me</span>
+                            </label>
+                            <a href="#" onclick="showForgotPassword()" class="text-teal-700 hover:underline">Forgot password?</a>
+                        </div>
+                        
+                        <button onclick="handleLogin()" class="w-full py-4 mt-2 bg-teal-900 text-white font-semibold rounded-3xl text-sm flex items-center justify-center gap-x-3">
+                            <span>Sign In</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-8 text-sm text-slate-600 dark:text-slate-400">
+                Don't have an account? <a href="#" onclick="navigateTo('register')" class="text-teal-700 font-medium">Create one</a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- REGISTER SECTION -->
+    <div id="register" class="section">
+        <div class="max-w-md mx-auto px-6 pt-12">
+            <div class="text-center mb-8">
+                <div class="font-semibold text-4xl tracking-tighter">Create your account</div>
+            </div>
+            
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-8 rounded-3xl">
+                <div class="space-y-5">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium mb-1.5">Full Name</label>
+                            <input type="text" placeholder="Rahul Sharma" class="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-3xl text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium mb-1.5">Phone</label>
+                            <input type="tel" placeholder="+91 98XXXXXXXX" class="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-3xl text-sm">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-medium mb-1.5">Email Address</label>
+                        <input type="email" placeholder="you@example.com" class="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-3xl text-sm">
+                    </div>
+                    
+                    <div class="flex gap-x-2">
+                        <button onclick="switchRegisterType('customer')" class="flex-1 py-3 text-sm font-medium bg-teal-900 text-white rounded-3xl">I'm a Customer</button>
+                        <button onclick="switchRegisterType('shopkeeper')" class="flex-1 py-3 text-sm font-medium border border-slate-300 dark:border-slate-700 rounded-3xl">I'm a Shopkeeper</button>
+                    </div>
+                    
+                    <button onclick="handleRegister()" class="w-full py-4 bg-teal-900 text-white font-semibold rounded-3xl">Create Account</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- PRODUCTS SECTION -->
+    <div id="products" class="section">
+        <div class="max-w-screen-2xl mx-auto px-8 py-10">
+            <div class="flex items-end justify-between mb-8">
+                <div>
+                    <div class="font-semibold text-4xl tracking-tighter">Products</div>
+                    <div class="text-slate-600 dark:text-slate-400">Discover fresh groceries from your local stores</div>
+                </div>
+                <div class="flex items-center gap-x-3">
+                    <input type="text" placeholder="Search products..." class="px-5 py-3 border border-slate-300 dark:border-slate-700 rounded-3xl w-72 text-sm">
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5">
+                <!-- Product Cards -->
+                <div class="product-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-3xl overflow-hidden">
+                    <div class="h-40 bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                        <i class="fa-solid fa-wheat-awn text-6xl text-teal-900"></i>
+                    </div>
+                    <div class="p-4">
+                        <div class="font-semibold">Aashirvaad Atta</div>
+                        <div class="text-xs text-slate-500">5kg • MRP ₹285</div>
+                        <div class="flex items-baseline gap-x-2 mt-2">
+                            <div class="font-semibold text-xl">₹245</div>
+                            <div class="text-xs line-through text-slate-400">₹285</div>
+                        </div>
+                        <button onclick="addToCart(this)" class="mt-3 text-xs w-full py-3 rounded-3xl border border-teal-700 text-teal-700 font-medium">Add to cart</button>
+                    </div>
+                </div>
+                
+                <div class="product-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-3xl overflow-hidden">
+                    <div class="h-40 bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                        <i class="fa-solid fa-seedling text-6xl text-teal-900"></i>
+                    </div>
+                    <div class="p-4">
+                        <div class="font-semibold">Basmati Rice</div>
+                        <div class="text-xs text-slate-500">1kg • MRP ₹165</div>
+                        <div class="flex items-baseline gap-x-2 mt-2">
+                            <div class="font-semibold text-xl">₹149</div>
+                        </div>
+                        <button onclick="addToCart(this)" class="mt-3 text-xs w-full py-3 rounded-3xl border border-teal-700 text-teal-700 font-medium">Add to cart</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- CATEGORIES SECTION -->
+    <div id="categories" class="section">
+        <div class="max-w-screen-2xl mx-auto px-8 py-10">
+            <div class="font-semibold text-4xl tracking-tighter mb-8">Categories</div>
+            <div class="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-4">
+                <div class="bg-white dark:bg-slate-900 p-5 border border-slate-200 dark:border-slate-700 rounded-3xl text-center cursor-pointer hover:border-teal-800 transition-colors"><i class="fa-solid fa-bread-slice mb-3 text-3xl text-teal-700"></i><div class="font-medium text-sm">Atta &amp; Flour</div></div>
+                <div class="bg-white dark:bg-slate-900 p-5 border border-slate-200 dark:border-slate-700 rounded-3xl text-center cursor-pointer hover:border-teal-800 transition-colors"><i class="fa-solid fa-seedling mb-3 text-3xl text-teal-700"></i><div class="font-medium text-sm">Rice &amp; Dal</div></div>
+                <div class="bg-white dark:bg-slate-900 p-5 border border-slate-200 dark:border-slate-700 rounded-3xl text-center cursor-pointer hover:border-teal-800 transition-colors"><i class="fa-solid fa-oil-can mb-3 text-3xl text-teal-700"></i><div class="font-medium text-sm">Oil &amp; Ghee</div></div>
+                <div class="bg-white dark:bg-slate-900 p-5 border border-slate-200 dark:border-slate-700 rounded-3xl text-center cursor-pointer hover:border-teal-800 transition-colors"><i class="fa-solid fa-mug-hot mb-3 text-3xl text-teal-700"></i><div class="font-medium text-sm">Tea &amp; Coffee</div></div>
+                <div class="bg-white dark:bg-slate-900 p-5 border border-slate-200 dark:border-slate-700 rounded-3xl text-center cursor-pointer hover:border-teal-800 transition-colors"><i class="fa-solid fa-apple-alt mb-3 text-3xl text-teal-700"></i><div class="font-medium text-sm">Fruits &amp; Vegetables</div></div>
+                <div class="bg-white dark:bg-slate-900 p-5 border border-slate-200 dark:border-slate-700 rounded-3xl text-center cursor-pointer hover:border-teal-800 transition-colors"><i class="fa-solid fa-baby mb-3 text-3xl text-teal-700"></i><div class="font-medium text-sm">Baby Care</div></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ABOUT SECTION -->
+    <div id="about" class="section">
+        <div class="max-w-screen-2xl mx-auto px-8 py-20 text-center">
+            <div class="max-w-lg mx-auto">
+                <div class="font-semibold text-5xl tracking-tighter">Built for the next billion Indians.</div>
+                <p class="mt-5 text-xl text-slate-600">UdharKart is the operating system for India's kirana ecosystem. We combine beautiful design with deep domain understanding.</p>
+            </div>
+        </div>
+    </div>
+    
+    <script src="js/app.js"></script>
+</body>
+</html>

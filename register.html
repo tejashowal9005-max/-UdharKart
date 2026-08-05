@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register • UdharKart</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>body { font-family: 'Inter', system_ui, sans-serif; }</style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950">
+    <div class="max-w-md mx-auto px-6 pt-14">
+        <div class="flex justify-center mb-8">
+            <div class="flex items-center gap-x-2.5">
+                <div class="w-9 h-9 bg-teal-900 rounded-2xl flex items-center justify-center"><span class="text-white font-semibold text-2xl">U</span></div>
+                <span class="font-semibold text-3xl tracking-tighter">UdharKart</span>
+            </div>
+        </div>
+        
+        <div class="text-center mb-8">
+            <div class="font-semibold text-4xl tracking-tighter">Create account</div>
+        </div>
+        
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-8 rounded-3xl">
+            <form onsubmit="handleRegister(event)">
+                <div class="space-y-5">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="text-sm font-medium mb-1.5 block">Full Name</label>
+                            <input type="text" placeholder="Rahul Sharma" class="w-full px-4 py-3.5 border border-slate-300 dark:border-slate-700 rounded-3xl text-sm" required></div>
+                        <div><label class="text-sm font-medium mb-1.5 block">Phone</label>
+                            <input type="tel" placeholder="+91 98XXXXXXXX" class="w-full px-4 py-3.5 border border-slate-300 dark:border-slate-700 rounded-3xl text-sm" required></div>
+                    </div>
+                    <div><label class="text-sm font-medium mb-1.5 block">Email</label>
+                        <input type="email" placeholder="you@email.com" class="w-full px-4 py-3.5 border border-slate-300 dark:border-slate-700 rounded-3xl text-sm"></div>
+                    
+                    <div class="flex gap-2">
+                        <button type="button" onclick="switchRegisterType('customer')" class="flex-1 py-3 text-sm font-semibold bg-teal-900 text-white rounded-3xl">Customer</button>
+                        <button type="button" onclick="switchRegisterType('shopkeeper')" class="flex-1 py-3 text-sm font-semibold border border-slate-300 dark:border-slate-700 rounded-3xl">Shopkeeper</button>
+                    </div>
+                    
+                    <button type="submit" class="mt-2 w-full py-4 bg-teal-900 text-white font-semibold rounded-3xl">Create Account</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script src="js/auth.js"></script>
+</body>
+</html>

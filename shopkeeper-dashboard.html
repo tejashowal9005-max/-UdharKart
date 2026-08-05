@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopkeeper Dashboard • UdharKart</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>body{font-family:'Inter',system_ui,sans-serif}</style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950">
+    <nav class="bg-white dark:bg-slate-900 border-b px-8 py-4 flex justify-between items-center">
+        <div class="font-semibold tracking-tighter flex items-center gap-x-2"><div class="w-8 h-8 bg-teal-900 rounded-2xl flex items-center justify-center"><span class="text-white">U</span></div> UdharKart</div>
+        <div class="text-sm font-medium">Sharma Kirana • <span class="text-emerald-600">Open</span></div>
+    </nav>
+    
+    <div class="max-w-screen-2xl mx-auto px-8 py-9">
+        <div class="font-semibold text-4xl tracking-tighter mb-9">Good afternoon, Ramesh</div>
+        
+        <div class="grid md:grid-cols-4 gap-6">
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-7 rounded-3xl">
+                <div class="text-xs">TODAY'S SALES</div>
+                <div class="font-semibold text-5xl tracking-tighter mt-2">₹1,24,890</div>
+            </div>
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-7 rounded-3xl">
+                <div class="text-xs">ORDERS</div>
+                <div class="font-semibold text-5xl tracking-tighter mt-2">184</div>
+                <div class="flex gap-x-2 text-xs mt-3"><div class="text-emerald-600">142 Completed</div><div class="text-amber-500">17 Pending</div></div>
+            </div>
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-7 rounded-3xl">
+                <div class="text-xs">PENDING UDHAR</div>
+                <div class="font-semibold text-5xl tracking-tighter mt-2">₹89,340</div>
+            </div>
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-7 rounded-3xl">
+                <div class="text-xs">STOCK ALERTS</div>
+                <div class="font-semibold text-5xl tracking-tighter mt-2 text-amber-600">14</div>
+            </div>
+        </div>
+        
+        <div class="mt-10 grid md:grid-cols-2 gap-6">
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-7 rounded-3xl">
+                <div class="font-semibold mb-5">Quick Actions</div>
+                <div class="grid grid-cols-3 gap-3 text-sm">
+                    <button onclick="location.href='billing.html'" class="py-4 border border-teal-700 text-teal-700 rounded-3xl font-medium">Generate Bill</button>
+                    <button onclick="location.href='inventory.html'" class="py-4 border border-teal-700 text-teal-700 rounded-3xl font-medium">Manage Inventory</button>
+                    <button onclick="location.href='customers.html'" class="py-4 border border-teal-700 text-teal-700 rounded-3xl font-medium">View Customers</button>
+                </div>
+            </div>
+            
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-7 rounded-3xl">
+                <div class="font-semibold mb-3">Revenue Trend</div>
+                <div class="h-20 flex items-end gap-x-px">
+                    <div class="flex-1 bg-teal-700 rounded-t" style="height:65%"></div>
+                    <div class="flex-1 bg-teal-700 rounded-t" style="height:90%"></div>
+                    <div class="flex-1 bg-teal-700 rounded-t" style="height:55%"></div>
+                    <div class="flex-1 bg-teal-700 rounded-t" style="height:100%"></div>
+                    <div class="flex-1 bg-teal-700 rounded-t" style="height:75%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="js/shopkeeper.js"></script>
+</body>
+</html>
