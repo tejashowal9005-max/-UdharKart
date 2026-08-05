@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard — UdharKart</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="css/variables.css" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/animations.css" />
+    <link rel="stylesheet" href="css/themes.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <span class="brand-icon">U</span>
+                <span class="brand-text">Udhar<span>Kart</span></span>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="customer-dashboard.html" class="active">
+                    <span class="material-symbols-rounded">dashboard</span> Dashboard
+                </a>
+                <a href="products.html">
+                    <span class="material-symbols-rounded">inventory_2</span> Products
+                </a>
+                <a href="categories.html">
+                    <span class="material-symbols-rounded">category</span> Categories
+                </a>
+                <a href="cart.html">
+                    <span class="material-symbols-rounded">shopping_cart</span> Cart
+                    <span class="badge" id="cartBadge">0</span>
+                </a>
+                <a href="orders.html">
+                    <span class="material-symbols-rounded">receipt_long</span> Orders
+                </a>
+                <a href="udhar.html">
+                    <span class="material-symbols-rounded">account_balance</span> My Udhar
+                </a>
+                <a href="payments.html">
+                    <span class="material-symbols-rounded">payments</span> Payments
+                </a>
+                <a href="profile.html">
+                    <span class="material-symbols-rounded">person</span> Profile
+                </a>
+                <a href="settings.html">
+                    <span class="material-symbols-rounded">settings</span> Settings
+                </a>
+                <a href="notifications.html">
+                    <span class="material-symbols-rounded">notifications</span> Notifications
+                    <span class="badge">3</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <button id="logoutBtn" class="btn btn-ghost btn-sm w-full">
+                    <span class="material-symbols-rounded">logout</span> Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="menu-toggle" id="menuToggle">
+                        <span class="material-symbols-rounded">menu</span>
+                    </button>
+                    <div>
+                        <h1>Welcome back, Rajesh 👋</h1>
+                        <p class="text-gray-500">Here's what's happening with your grocery today</p>
+                    </div>
+                </div>
+                <div class="topbar-right">
+                    <div class="search-box">
+                        <span class="material-symbols-rounded">search</span>
+                        <input type="text" placeholder="Search products..." id="globalSearch" />
+                    </div>
+                    <button class="icon-btn" id="notifToggle">
+                        <span class="material-symbols-rounded">notifications</span>
+                        <span class="badge-dot"></span>
+                    </button>
+                    <button class="icon-btn theme-toggle">
+                        <span class="material-symbols-rounded">dark_mode</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Stats -->
+            <section class="stats-grid">
+                <div class="stat-card glass">
+                    <span class="stat-label">Total Orders</span>
+                    <span class="stat-value" id="totalOrders">24</span>
+                    <span class="stat-change up">+12%</span>
+                </div>
+                <div class="stat-card glass">
+                    <span class="stat-label">Udhar Balance</span>
+                    <span class="stat-value" id="udharBalance">₹4,320</span>
+                    <span class="stat-change down">-8%</span>
+                </div>
+                <div class="stat-card glass">
+                    <span class="stat-label">Saved Carts</span>
+                    <span class="stat-value">3</span>
+                    <span class="stat-change up">+2</span>
+                </div>
+                <div class="stat-card glass">
+                    <span class="stat-label">Favorites</span>
+                    <span class="stat-value">18</span>
+                    <span class="stat-change">—</span>
+                </div>
+            </section>
+
+            <!-- Recent Orders -->
+            <section class="section-header">
+                <h2>🛒 Recent Orders</h2>
+                <a href="orders.html" class="see-all">View All →</a>
+            </section>
+            <div id="recentOrders" class="order-list">
+                <!-- populated by JS -->
+            </div>
+
+            <!-- Popular Categories -->
+            <section class="section-header">
+                <h2>📂 Popular Categories</h2>
+                <a href="categories.html" class="see-all">See All →</a>
+            </section>
+            <div class="category-scroll">
+                <div class="category-chip">🥫 Groceries</div>
+                <div class="category-chip">🧀 Dairy</div>
+                <div class="category-chip">☕ Beverages</div>
+                <div class="category-chip">🍪 Snacks</div>
+                <div class="category-chip">🧹 Household</div>
+                <div class="category-chip">🍚 Rice & Grains</div>
+                <div class="category-chip">🌶️ Spices</div>
+                <div class="category-chip">🧴 Personal Care</div>
+            </div>
+
+            <!-- Popular Products -->
+            <section class="section-header">
+                <h2>⭐ Popular Products</h2>
+                <a href="products.html" class="see-all">View All →</a>
+            </section>
+            <div class="product-grid" id="popularProducts">
+                <!-- populated by JS -->
+            </div>
+
+            <!-- Quick Actions -->
+            <section class="quick-actions">
+                <div class="quick-action-card glass">
+                    <span class="material-symbols-rounded">shopping_bag</span>
+                    <span>Order Again</span>
+                </div>
+                <div class="quick-action-card glass">
+                    <span class="material-symbols-rounded">list_alt</span>
+                    <span>Create List</span>
+                </div>
+                <div class="quick-action-card glass">
+                    <span class="material-symbols-rounded">receipt</span>
+                    <span>View Bills</span>
+                </div>
+                <div class="quick-action-card glass">
+                    <span class="material-symbols-rounded">support_agent</span>
+                    <span>Help</span>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Notification Dropdown -->
+    <div class="notif-dropdown" id="notifDropdown">
+        <div class="notif-header">
+            <span>Notifications</span>
+            <button class="btn btn-ghost btn-sm">Mark all read</button>
+        </div>
+        <div class="notif-item">
+            <span class="notif-icon">🛒</span>
+            <div>
+                <strong>Order #ORD-1028</strong> is ready
+                <span class="notif-time">2 min ago</span>
+            </div>
+        </div>
+        <div class="notif-item">
+            <span class="notif-icon">💰</span>
+            <div>
+                <strong>Payment received</strong> ₹245
+                <span class="notif-time">18 min ago</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/utils.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/orders.js"></script>
+    <script src="js/customer.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
